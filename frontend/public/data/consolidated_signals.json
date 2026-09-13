@@ -1,0 +1,128 @@
+{
+  "generated_at": "2026-09-13 23:04:24 IST",
+  "as_of_date": "11-Sep-2026",
+  "market_regime": {
+    "breadth_pct": 34.0,
+    "gate_open": false,
+    "status_label": "DEFENSIVE (CASH PROTECTION)",
+    "total_stocks_evaluated": 500,
+    "stocks_above_ema50": 170
+  },
+  "total_triggers": 2,
+  "all_signals_unified": [
+    {
+      "strategy_id": "gfs_mtf_rsi",
+      "rank": 1,
+      "symbol": "GRWRHITECH",
+      "company_name": "Garware Hi-Tech Films Ltd.",
+      "industry": "Capital Goods",
+      "index_name": "NIFTY 500",
+      "close": 6921.5,
+      "entry_trigger": 7010.0,
+      "trailing_sl": 6724.11,
+      "daily_rsi": 45.08,
+      "weekly_rsi": 0.0,
+      "monthly_rsi": 0.0,
+      "as_of_date": "11-Sep-2026",
+      "groww_chart_url": "https://groww.in/charts/stocks/garware-hi-tech-films-ltd?exchange=NSE",
+      "strategy_name": "GFS Multi-Timeframe RSI Swing Strategy"
+    },
+    {
+      "strategy_id": "gfs_mtf_rsi",
+      "rank": 2,
+      "symbol": "GABRIEL",
+      "company_name": "Gabriel India Ltd.",
+      "industry": "Automobile and Auto Components",
+      "index_name": "NIFTY 500",
+      "close": 1346.4,
+      "entry_trigger": 1369.3,
+      "trailing_sl": 1303.07,
+      "daily_rsi": 44.08,
+      "weekly_rsi": 0.0,
+      "monthly_rsi": 0.0,
+      "as_of_date": "11-Sep-2026",
+      "groww_chart_url": "https://groww.in/charts/stocks/gabriel-india-ltd?exchange=NSE",
+      "strategy_name": "GFS Multi-Timeframe RSI Swing Strategy"
+    }
+  ],
+  "portfolio_summary": {
+    "total_open_positions": 0,
+    "max_slots": 5,
+    "available_slots": 5,
+    "slots_label": "0 / 5 Filled",
+    "total_invested_capital": 0,
+    "total_current_value": 0,
+    "total_unrealized_pnl": 0,
+    "total_unrealized_pnl_pct": 0.0,
+    "positions": []
+  },
+  "active_positions": [],
+  "backup_status": {
+    "last_snapshot_id": "snapshot_2026-09-13_230423_daily_screener",
+    "created_at": "2026-09-13 23:04:23 IST",
+    "integrity_ok": true
+  },
+  "strategies": {
+    "rsi_52w_breakout": {
+      "strategy_id": "rsi_52w_breakout",
+      "display_name": "3-Day RSI UP + 52W High Breakout",
+      "as_of_date": "11-Sep-2026",
+      "market_regime": {
+        "breadth_pct": 34.0,
+        "gate_open": false,
+        "status_label": "DEFENSIVE (CASH PROTECTION)",
+        "total_stocks_evaluated": 500,
+        "stocks_above_ema50": 170
+      },
+      "fresh_signals_count": 0,
+      "fresh_signals": []
+    },
+    "clean_candle_5y": {
+      "strategy_id": "clean_candle_5y",
+      "display_name": "5-Year High Breakout (Clean Candle Quality Filter)",
+      "as_of_date": "11-Sep-2026",
+      "fresh_signals_count": 0,
+      "fresh_signals": []
+    },
+    "gfs_mtf_rsi": {
+      "strategy_id": "gfs_mtf_rsi",
+      "display_name": "GFS Multi-Timeframe RSI Swing Strategy",
+      "as_of_date": "11-Sep-2026",
+      "fresh_signals_count": 2,
+      "fresh_signals": [
+        {
+          "strategy_id": "gfs_mtf_rsi",
+          "rank": 1,
+          "symbol": "GRWRHITECH",
+          "company_name": "Garware Hi-Tech Films Ltd.",
+          "industry": "Capital Goods",
+          "index_name": "NIFTY 500",
+          "close": 6921.5,
+          "entry_trigger": 7010.0,
+          "trailing_sl": 6724.11,
+          "daily_rsi": 45.08,
+          "weekly_rsi": 0.0,
+          "monthly_rsi": 0.0,
+          "as_of_date": "11-Sep-2026",
+          "groww_chart_url": "https://groww.in/charts/stocks/garware-hi-tech-films-ltd?exchange=NSE"
+        },
+        {
+          "strategy_id": "gfs_mtf_rsi",
+          "rank": 2,
+          "symbol": "GABRIEL",
+          "company_name": "Gabriel India Ltd.",
+          "industry": "Automobile and Auto Components",
+          "index_name": "NIFTY 500",
+          "close": 1346.4,
+          "entry_trigger": 1369.3,
+          "trailing_sl": 1303.07,
+          "daily_rsi": 44.08,
+          "weekly_rsi": 0.0,
+          "monthly_rsi": 0.0,
+          "as_of_date": "11-Sep-2026",
+          "groww_chart_url": "https://groww.in/charts/stocks/gabriel-india-ltd?exchange=NSE"
+        }
+      ]
+    }
+  }
+}

@@ -45,9 +45,15 @@ share/python-wheels/
 # Logs and runtime metadata
 *.log
 sync_log.json
-output/
-outputs/
-data/
+/output/
+/outputs/
+**/outputs/
+**/output/
+/data/
+!frontend/public/data/
+!frontend/public/data/**
+**/desktop.ini
+*.ini
 *.db
 *.db-wal
 *.db-shm
