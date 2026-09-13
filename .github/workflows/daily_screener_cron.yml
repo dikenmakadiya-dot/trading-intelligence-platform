@@ -1,0 +1,45 @@
+﻿name: Daily Multi-Strategy Screener
+
+on:
+  schedule:
+    # Runs Monday through Friday at 10:45 UTC (4:15 PM IST)
+    - cron: '45 10 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: 'Target Scan Date (YYYY-MM-DD)'
+        required: false
+        default: ''
+
+jobs:
+  run-screener:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Multi-Strategy Screener Pipeline
+        run: |
+          if [ -n "${{ github.event.inputs.target_date }}" ]; then
+            python src/orchestrator.py --mode screener --date "${{ github.event.inputs.target_date }}"
+          else
+            python src/orchestrator.py --mode screener
+          fi
+
+      - name: Upload Consolidated Signals Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-signals-report
+          path: output/consolidated_signals.json
+          retention-days: 30
