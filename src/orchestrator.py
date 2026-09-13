@@ -92,7 +92,6 @@ def run_all_screeners(target_date: str = None) -> Dict[str, Any]:
 
     # 3. Track & Update Active Portfolio Positions
     try:
-        portfolio_mgr.seed_initial_positions_if_empty()
         portfolio_summary = portfolio_mgr.update_active_positions(target_date=as_of_date)
         print(f"[PORTFOLIO] Active Positions: {portfolio_summary['slots_label']} | Unrealized P&L: INR {portfolio_summary['total_unrealized_pnl']:,.2f} ({portfolio_summary['total_unrealized_pnl_pct']:+.2f}%)")
     except Exception as e:

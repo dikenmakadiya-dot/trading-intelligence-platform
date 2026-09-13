@@ -45,13 +45,14 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
   }, [initialStrategyId]);
 
   const strategies = [
-    { id: 'rsi_52w_breakout', name: '3-Day RSI UP + 52W High', short: '3D-RSI' },
-    { id: 'clean_candle_5y', name: '5Y High Clean Breakout', short: '5Y Clean' },
-    { id: 'gfs_mtf_rsi', name: 'GFS Multi-Timeframe RSI', short: 'GFS MTF' }
+    { id: 'rsi_52w_breakout', name: '3-Day RSI Breakout', short: '3D-RSI' },
+    { id: 'clean_candle_5y', name: '5Y Clean Breakout', short: '5Y Clean' },
+    { id: 'gfs_mtf_rsi', name: 'GFS Multi-Timeframe', short: 'GFS MTF' }
   ];
 
-  const currentKpiData = backtestData?.kpis?.[activeStrategy];
-  const rawKpi = currentKpiData?.kpis;
+  const currentStrategyData = backtestData?.strategies?.[activeStrategy];
+  const currentKpiData = currentStrategyData || backtestData?.kpis?.[activeStrategy];
+  const rawKpi = currentStrategyData?.kpis || currentKpiData?.kpis;
   const hasKpiData = Boolean(
     rawKpi &&
     typeof rawKpi === 'object' &&
@@ -84,10 +85,11 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
   const expectancyAmt = kpis.expectancy_amt ?? kpis.expectancy_amount ?? 0;
   const expectancyPct = kpis.expectancy_pct ?? 0;
   const realizedRR = kpis.realized_rr ?? (kpis.profit_factor || 0);
+  const activeEquityCurve = currentStrategyData?.equity_curve || (backtestData?.equity_curve || []);
 
   // Filter and sort trades
   const trades: BacktestTrade[] = useMemo(() => {
-    const raw = (backtestData?.trades || []).filter(
+    const raw = (currentStrategyData?.trade_log || backtestData?.trades || []).filter(
       (t) => !t.strategy_id || t.strategy_id === activeStrategy
     );
 
@@ -107,7 +109,7 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
       if (valA > valB) return sortAsc ? 1 : -1;
       return 0;
     });
-  }, [backtestData?.trades, activeStrategy, searchQuery, sortField, sortAsc]);
+  }, [currentStrategyData?.trade_log, backtestData?.trades, activeStrategy, searchQuery, sortField, sortAsc]);
 
   // TanStack Virtual row virtualizer
   const rowVirtualizer = useVirtualizer({
@@ -247,11 +249,11 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
             </h3>
           </div>
           <span className="font-mono text-xs text-slate-400 tabular-nums">
-            {backtestData?.equity_curve?.length || 0} Daily Points
+            {activeEquityCurve.length} Daily Points
           </span>
         </div>
 
-        <EquityCurveChart data={backtestData?.equity_curve || []} height={320} />
+        <EquityCurveChart data={activeEquityCurve} height={320} />
       </div>
 
       {/* Audited Historical Trade Log */}

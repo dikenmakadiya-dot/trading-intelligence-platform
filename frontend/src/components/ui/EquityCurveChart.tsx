@@ -18,19 +18,20 @@ export const EquityCurveChart: React.FC<EquityCurveChartProps> = ({ data, height
     let peak = -Infinity;
     let worstDD = 0;
 
-    const enriched = data.map((d) => {
-      const val = d.portfolio_value;
+    const enriched = data.map((d: any) => {
+      const val = Number(d.portfolio_value ?? d.portfolio_equity ?? 0);
       if (val > peak) peak = val;
       const dd = peak > 0 ? ((val - peak) / peak) * 100 : 0;
       if (dd < worstDD) worstDD = dd;
       return {
         ...d,
+        portfolio_value: val,
         drawdown: dd,
         peak
       };
     });
 
-    const values = data.map((d) => d.portfolio_value);
+    const values = enriched.map((d) => d.portfolio_value);
     const minV = Math.min(...values) * 0.95;
     const maxV = Math.max(...values) * 1.05;
 

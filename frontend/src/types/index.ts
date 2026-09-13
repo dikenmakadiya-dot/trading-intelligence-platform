@@ -131,6 +131,7 @@ export interface BacktestDataPayload {
   equity_curve: EquityCurvePoint[];
   trades: BacktestTrade[];
   strategy_id?: string | null;
+  strategies?: Record<string, { display_name: string; kpis: StrategyKPI; trades_count: number; trade_log: BacktestTrade[]; equity_curve: EquityCurvePoint[] }>;
 }
 
 export interface SystemHealthData {

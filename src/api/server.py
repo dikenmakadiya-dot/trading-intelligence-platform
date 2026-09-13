@@ -233,21 +233,38 @@ class QuantFlowRequestHandler(SimpleHTTPRequestHandler):
         strategy_id = query.get("strategy_id", [None])[0]
 
         try:
+            verified_file = PROJECT_ROOT / "data" / "verified_backtest_data.json"
+            strategies_map = {}
+            if verified_file.exists():
+                with open(verified_file, "r", encoding="utf-8") as f:
+                    v_data = json.load(f)
+                    strategies_map = v_data.get("strategies", {})
+
             # 1. KPIs
             kpis = {}
             if STRATEGY_SUMMARY_JSON.exists():
                 with open(STRATEGY_SUMMARY_JSON, "r", encoding="utf-8") as f:
                     kpis = json.load(f)
+            elif strategies_map:
+                for s_id, s_obj in strategies_map.items():
+                    kpis[s_id] = {
+                        "display_name": s_obj.get("display_name", s_id),
+                        "kpis": s_obj.get("kpis", {}),
+                        "trades_count": s_obj.get("trades_count", 0)
+                    }
 
             # 2. Equity curve
             equity_curve = []
-            eq_csv = BACKTEST_OUTPUT_DIR / "equity_curve.csv"
-            if eq_csv.exists():
-                import pandas as pd
-                df_eq = pd.read_csv(eq_csv)
-                equity_curve = df_eq.to_dict(orient="records")
+            if strategy_id and strategy_id in strategies_map:
+                equity_curve = strategies_map[strategy_id].get("equity_curve", [])
+            else:
+                eq_csv = BACKTEST_OUTPUT_DIR / "equity_curve.csv"
+                if eq_csv.exists():
+                    import pandas as pd
+                    df_eq = pd.read_csv(eq_csv)
+                    equity_curve = df_eq.to_dict(orient="records")
 
-            # 3. Trade logs from DB or CSV
+            # 3. Trade logs from verified map, DB, or CSV
             limit_val = 2000
             if "limit" in query:
                 try:
@@ -255,23 +272,27 @@ class QuantFlowRequestHandler(SimpleHTTPRequestHandler):
                 except Exception:
                     limit_val = 2000
 
-            db = get_db()
-            trades = db.get_backtest_trades(strategy_id=strategy_id, limit=limit_val)
-            if not trades:
-                t_csv = BACKTEST_OUTPUT_DIR / "trade_log.csv"
-                if t_csv.exists():
-                    import pandas as pd
-                    df_trades = pd.read_csv(t_csv)
-                    if strategy_id:
-                        if "strategy_id" in df_trades.columns:
+            trades = []
+            if strategy_id and strategy_id in strategies_map:
+                trades = strategies_map[strategy_id].get("trade_log", [])[:limit_val]
+            else:
+                db = get_db()
+                trades = db.get_backtest_trades(strategy_id=strategy_id, limit=limit_val)
+                if not trades:
+                    t_csv = BACKTEST_OUTPUT_DIR / "trade_log.csv"
+                    if t_csv.exists():
+                        import pandas as pd
+                        df_trades = pd.read_csv(t_csv)
+                        if strategy_id and "strategy_id" in df_trades.columns:
                             df_trades = df_trades[df_trades["strategy_id"] == strategy_id]
-                    trades = df_trades.head(limit_val).to_dict(orient="records")
+                        trades = df_trades.head(limit_val).to_dict(orient="records")
 
             data = {
                 "kpis": kpis,
                 "equity_curve": equity_curve,
                 "trades": trades,
-                "strategy_id": strategy_id
+                "strategy_id": strategy_id,
+                "strategies": strategies_map
             }
             self._send_json(data)
         except Exception as e:
