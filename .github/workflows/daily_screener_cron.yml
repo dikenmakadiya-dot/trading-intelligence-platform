@@ -1,4 +1,4 @@
-﻿name: Daily Multi-Strategy Screener
+name: Daily Multi-Strategy Screener
 
 on:
   schedule:
@@ -37,9 +37,12 @@ jobs:
             python src/orchestrator.py --mode screener
           fi
 
-      - name: Upload Consolidated Signals Artifact
+      - name: Upload Daily Signals & Database Backup Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: daily-signals-report
-          path: output/consolidated_signals.json
+          name: daily-signals-and-db-backup
+          path: |
+            output/consolidated_signals.json
+            output/backups/
+            data/trading_platform.db
           retention-days: 30

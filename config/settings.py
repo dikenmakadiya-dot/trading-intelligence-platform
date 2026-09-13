@@ -1,4 +1,4 @@
-﻿"""
+"""
 Global Configuration & Settings for Quant Trading Intelligence Platform
 """
 
@@ -15,9 +15,17 @@ SRC_DIR = REPO_ROOT / "src"
 OUTPUT_DIR = REPO_ROOT / "output"
 BACKTEST_OUTPUT_DIR = OUTPUT_DIR / "backtest_results"
 LIVE_SIGNALS_OUTPUT_DIR = OUTPUT_DIR / "live_signals"
+BACKUP_DIR = OUTPUT_DIR / "backups"
+DATA_DIR = REPO_ROOT / "data"
+DB_DIR = SRC_DIR / "db"
 
-# Ensure output directories exist
-for p in [OUTPUT_DIR, BACKTEST_OUTPUT_DIR, LIVE_SIGNALS_OUTPUT_DIR]:
+# Database Configuration
+DEFAULT_DB_PATH = DATA_DIR / "trading_platform.db"
+DATABASE_URL = os.getenv("DATABASE_URL", str(DEFAULT_DB_PATH))
+BACKUP_RETENTION_DAYS = int(os.getenv("BACKUP_RETENTION_DAYS", "30"))
+
+# Ensure required directories exist
+for p in [OUTPUT_DIR, BACKTEST_OUTPUT_DIR, LIVE_SIGNALS_OUTPUT_DIR, BACKUP_DIR, DATA_DIR, DB_DIR]:
     p.mkdir(parents=True, exist_ok=True)
 
 # Historical Data Paths

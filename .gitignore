@@ -1,4 +1,4 @@
-﻿# Windows OS
+# Windows OS
 desktop.ini
 Thumbs.db
 ehthumbs.db
@@ -47,6 +47,11 @@ share/python-wheels/
 sync_log.json
 output/
 outputs/
+data/
+*.db
+*.db-wal
+*.db-shm
+*.bak
 
 # Environment and Secrets
 .env
