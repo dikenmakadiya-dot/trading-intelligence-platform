@@ -43,10 +43,17 @@ class Strategy1RSI52W(BaseStrategy):
         curr_breadth = float(breadth_series.get(t_date, 0.5)) * 100.0
         gate_open = curr_breadth >= BREADTH_GATE_THRESHOLD
 
+        nifty500_mask = (df["Index_Name"] == "NIFTY 500") if "Index_Name" in df.columns else pd.Series(True, index=df.index)
+        day_nifty = df[nifty500_mask & (df["Date"] == t_date)]
+        total_eval = len(day_nifty)
+        above_ema = int((day_nifty["Close"] > day_nifty["EMA_50"]).sum()) if "EMA_50" in day_nifty.columns else 0
+
         regime_info = {
             "breadth_pct": round(curr_breadth, 2),
             "gate_open": gate_open,
-            "status_label": "AGGRESSIVE (GATE OPEN)" if gate_open else "DEFENSIVE (CASH PROTECTION)"
+            "status_label": "AGGRESSIVE (GATE OPEN)" if gate_open else "DEFENSIVE (CASH PROTECTION)",
+            "total_stocks_evaluated": total_eval,
+            "stocks_above_ema50": above_ema
         }
 
         # Run candidate signal scanning

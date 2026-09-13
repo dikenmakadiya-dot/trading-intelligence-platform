@@ -29,6 +29,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Restore Persistent Database & Backups Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            data/trading_platform.db
+            output/backups/
+          key: trading-db-${{ github.run_id }}
+          restore-keys: |
+            trading-db-
+
       - name: Run Multi-Strategy Screener Pipeline
         run: |
           if [ -n "${{ github.event.inputs.target_date }}" ]; then

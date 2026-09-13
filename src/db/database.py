@@ -71,6 +71,11 @@ class DatabaseManager:
         """
         Saves or updates market breadth and regime status for a given date.
         """
+        try:
+            date_norm = pd.to_datetime(date_val).strftime("%Y-%m-%d")
+        except Exception:
+            date_norm = str(date_val)
+
         query = """
         INSERT INTO market_regime_history (
             date, breadth_pct, gate_open, status_label, total_stocks_evaluated, stocks_above_ema50, created_at
@@ -87,7 +92,7 @@ class DatabaseManager:
             self.conn.execute(
                 query,
                 (
-                    str(date_val),
+                    date_norm,
                     float(breadth_pct),
                     1 if gate_open else 0,
                     str(status_label),
@@ -634,13 +639,30 @@ class DatabaseManager:
     def close(self):
         """Closes the underlying SQLite connection."""
         if self.conn:
-            self.conn.close()
+            try:
+                self.conn.close()
+            except Exception:
+                pass
+            self.conn = None
 
 # Singleton instance accessor
 _db_instance: Optional[DatabaseManager] = None
 
 def get_db(db_path: Optional[Union[str, Path]] = None) -> DatabaseManager:
     global _db_instance
-    if _db_instance is None or db_path is not None:
-        _db_instance = DatabaseManager(db_path=db_path)
+    if db_path is not None:
+        # Custom DB paths should get an independent instance without polluting default singleton
+        p = Path(db_path)
+        if _db_instance is not None and _db_instance.db_path == p and _db_instance.conn is not None:
+            return _db_instance
+        return DatabaseManager(db_path=p)
+    if _db_instance is None or _db_instance.conn is None:
+        _db_instance = DatabaseManager(db_path=DEFAULT_DB_PATH)
     return _db_instance
+
+def reset_db():
+    """Resets the singleton database manager, closing active connections."""
+    global _db_instance
+    if _db_instance is not None:
+        _db_instance.close()
+        _db_instance = None

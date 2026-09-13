@@ -32,7 +32,7 @@ def get_registered_strategies():
 
 def run_all_screeners(target_date: str = None) -> Dict[str, Any]:
     print("=" * 70)
-    print("?? QUANTFLOW TRADING INTELLIGENCE - MULTI-STRATEGY SCREENER PIPELINE")
+    print("[PIPELINE] QUANTFLOW TRADING INTELLIGENCE - MULTI-STRATEGY SCREENER PIPELINE")
     print(f"Timestamp: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 70)
 
@@ -74,7 +74,9 @@ def run_all_screeners(target_date: str = None) -> Dict[str, Any]:
                 date_val=as_of_date,
                 breadth_pct=float(market_regime.get("breadth_pct", 0.0)),
                 gate_open=bool(market_regime.get("gate_open", False)),
-                status_label=str(market_regime.get("status_label", ""))
+                status_label=str(market_regime.get("status_label", "")),
+                total_stocks=int(market_regime.get("total_stocks_evaluated", 0)),
+                stocks_above_ema50=int(market_regime.get("stocks_above_ema50", 0))
             )
             print(f"[DATABASE] Market Regime persisted for date: {as_of_date}")
         except Exception as e:
@@ -130,7 +132,7 @@ def run_all_screeners(target_date: str = None) -> Dict[str, Any]:
         json.dump(consolidated, f, indent=2)
 
     print("\n" + "=" * 70)
-    print(f"? Master Stage Consolidated Payload saved to:\n   {CONSOLIDATED_SIGNALS_JSON}")
+    print(f"[SUCCESS] Master Stage Consolidated Payload saved to:\n   {CONSOLIDATED_SIGNALS_JSON}")
     print(f"   Total Actionable Breakout Triggers Across All Strategies: {len(all_signals_unified)}")
     print(f"   Active Open Positions Tracked: {len(portfolio_summary.get('positions', []))}")
     print("=" * 70)
@@ -139,7 +141,7 @@ def run_all_screeners(target_date: str = None) -> Dict[str, Any]:
 
 def run_all_backtests() -> Dict[str, Any]:
     print("=" * 70)
-    print("?? EXECUTING ON-DEMAND BACKTEST REFRESH ACROSS ALL STRATEGIES")
+    print("[BACKTEST] EXECUTING ON-DEMAND BACKTEST REFRESH ACROSS ALL STRATEGIES")
     print("=" * 70)
 
     db = get_db()
@@ -193,7 +195,7 @@ def run_all_backtests() -> Dict[str, Any]:
         json.dump(summaries, f, indent=2)
 
     print("\n" + "=" * 70)
-    print(f"? Backtest Summary saved to:\n   {STRATEGY_SUMMARY_JSON}")
+    print(f"[SUCCESS] Backtest Summary saved to:\n   {STRATEGY_SUMMARY_JSON}")
     print("=" * 70)
 
     return summaries

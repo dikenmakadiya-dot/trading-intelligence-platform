@@ -42,9 +42,9 @@ class TestDatabaseManager(unittest.TestCase):
 
     def test_market_regime_crud(self):
         """Verify insert, update (upsert) and retrieval of market regime."""
-        # Insert
+        # Insert with non-ISO date string (e.g. 11-Sep-2026) to test normalization
         ok = self.db.save_market_regime(
-            date_val="2026-09-11",
+            date_val="11-Sep-2026",
             breadth_pct=54.2,
             gate_open=True,
             status_label="AGGRESSIVE (GATE OPEN)",
@@ -55,20 +55,26 @@ class TestDatabaseManager(unittest.TestCase):
 
         latest = self.db.get_latest_market_regime()
         self.assertIsNotNone(latest)
-        self.assertEqual(latest["date"], "2026-09-11")
+        self.assertEqual(latest["date"], "2026-09-11")  # Normalized to ISO
         self.assertEqual(latest["breadth_pct"], 54.2)
         self.assertTrue(latest["gate_open"])
+        self.assertEqual(latest["total_stocks_evaluated"], 750)
+        self.assertEqual(latest["stocks_above_ema50"], 406)
 
         # Upsert (update existing date)
         self.db.save_market_regime(
             date_val="2026-09-11",
             breadth_pct=34.0,
             gate_open=False,
-            status_label="DEFENSIVE (CASH PROTECTION)"
+            status_label="DEFENSIVE (CASH PROTECTION)",
+            total_stocks=750,
+            stocks_above_ema50=255
         )
         updated = self.db.get_latest_market_regime()
+        self.assertEqual(updated["date"], "2026-09-11")
         self.assertEqual(updated["breadth_pct"], 34.0)
         self.assertFalse(updated["gate_open"])
+        self.assertEqual(updated["stocks_above_ema50"], 255)
 
     def test_daily_signals_crud(self):
         """Verify daily signals persistence, deduplication, and metrics parsing."""
