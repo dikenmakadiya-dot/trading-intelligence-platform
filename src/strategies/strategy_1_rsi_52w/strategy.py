@@ -102,13 +102,13 @@ class Strategy1RSI52W(BaseStrategy):
 
     def run_backtest(self) -> Dict[str, Any]:
         df = self.load_data()
-        trades_df, equity_df = execute_backtest(df, variant="champion")
-        kpis = calculate_kpis(trades_df, equity_df)
+        kpis, completed_trades, daily_timeline = execute_backtest(df)
         return {
             "strategy_id": self.strategy_id,
             "display_name": self.display_name,
             "kpis": kpis,
-            "trades_count": len(trades_df),
-            "trade_log": trades_df.to_dict(orient="records"),
-            "equity_curve": equity_df.to_dict(orient="records")
+            "trades_count": len(completed_trades),
+            "trade_log": completed_trades,
+            "equity_curve": daily_timeline
         }
+

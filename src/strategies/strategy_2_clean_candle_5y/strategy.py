@@ -1,4 +1,4 @@
-﻿"""
+"""
 Strategy 2: 5-Year High Breakout Momentum (Clean Candle Quality Filter)
 Implements BaseStrategy contract.
 """
@@ -83,14 +83,13 @@ class Strategy2CleanCandle5Y(BaseStrategy):
 
     def run_backtest(self) -> Dict[str, Any]:
         df = self.load_data()
-        raw_signals = scan_all_signals(df, start_date="2024-08-25")
-        trades_df, equity_df = execute_backtest(df, raw_signals)
-        kpis = calculate_kpis(trades_df, equity_df)
+        kpis, executed_trades, daily_history = execute_backtest(df)
         return {
             "strategy_id": self.strategy_id,
             "display_name": self.display_name,
             "kpis": kpis,
-            "trades_count": len(trades_df),
-            "trade_log": trades_df.to_dict(orient="records"),
-            "equity_curve": equity_df.to_dict(orient="records")
+            "trades_count": len(executed_trades),
+            "trade_log": executed_trades,
+            "equity_curve": daily_history
         }
+
