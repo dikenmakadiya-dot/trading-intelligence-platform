@@ -48,7 +48,7 @@ if (Test-Path "$TargetDir\src") {
 # 3. Execute compilation and build
 Write-Host "Executing production build: tsc && vite build..."
 Push-Location $BuilderDir
-cmd.exe /c "npm.cmd run build"
+cmd.exe /c "npx tsc && npx vite build"
 $exitCode = $LASTEXITCODE
 Pop-Location
 

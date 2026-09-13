@@ -57,7 +57,8 @@ export const EquityCurveChart: React.FC<EquityCurveChartProps> = ({ data, height
 
   // Coordinate scales
   const getX = (index: number) => {
-    return paddingX + (index / (chartData.length - 1)) * (width - paddingX - 20);
+    const denom = chartData.length > 1 ? chartData.length - 1 : 1;
+    return paddingX + (index / denom) * (width - paddingX - 20);
   };
 
   const getEquityY = (val: number) => {

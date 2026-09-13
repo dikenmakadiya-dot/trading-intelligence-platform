@@ -141,5 +141,40 @@ class TestAPIServer(unittest.TestCase):
         self.assertIn("javascript", ct_sw)
         self.assertGreater(len(body_sw), 100)
 
+    def test_get_backtest_data_filtered_by_strategy(self):
+        """Verify /api/backtest-data correctly filters trades by strategy_id."""
+        status, ct, body = self._get("/api/backtest-data?strategy_id=clean_candle_5y")
+        self.assertEqual(status, 200)
+        payload = json.loads(body.decode("utf-8"))
+        self.assertEqual(payload["strategy_id"], "clean_candle_5y")
+        trades = payload["trades"]
+        self.assertGreater(len(trades), 0)
+        for t in trades[:10]:
+            self.assertEqual(t["strategy_id"], "clean_candle_5y")
+
+    def test_download_backup_manifest(self):
+        """Verify /api/backups/download retrieves snapshot manifest."""
+        status_b, _, body_b = self._get("/api/backups")
+        self.assertEqual(status_b, 200)
+        backups = json.loads(body_b.decode("utf-8"))
+        if backups.get("snapshots"):
+            snap_id = backups["snapshots"][0]["snapshot_id"]
+            status_dl, ct_dl, body_dl = self._get(f"/api/backups/download?snapshot_id={snap_id}&type=manifest")
+            self.assertEqual(status_dl, 200)
+            self.assertIn("application/json", ct_dl)
+            manifest = json.loads(body_dl.decode("utf-8"))
+            self.assertEqual(manifest["snapshot_id"], snap_id)
+
+    def test_unknown_api_endpoint_404(self):
+        """Verify unknown /api/* endpoints return 404 with JSON error."""
+        try:
+            status, ct, body = self._get("/api/nonexistent-endpoint")
+        except HTTPError as e:
+            status = e.code
+            body = e.read()
+        self.assertEqual(status, 404)
+        payload = json.loads(body.decode("utf-8"))
+        self.assertIn("error", payload)
+
 if __name__ == "__main__":
     unittest.main()

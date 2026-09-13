@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "powershell -ExecutionPolicy Bypass -File ./build_pwa.ps1",
     "preview": "vite preview"
   },
   "dependencies": {

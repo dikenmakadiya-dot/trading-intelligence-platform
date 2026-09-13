@@ -248,8 +248,15 @@ class QuantFlowRequestHandler(SimpleHTTPRequestHandler):
                 equity_curve = df_eq.to_dict(orient="records")
 
             # 3. Trade logs from DB or CSV
+            limit_val = 2000
+            if "limit" in query:
+                try:
+                    limit_val = int(query["limit"][0])
+                except Exception:
+                    limit_val = 2000
+
             db = get_db()
-            trades = db.get_backtest_trades(strategy_id=strategy_id, limit=500)
+            trades = db.get_backtest_trades(strategy_id=strategy_id, limit=limit_val)
             if not trades:
                 t_csv = BACKTEST_OUTPUT_DIR / "trade_log.csv"
                 if t_csv.exists():
@@ -258,7 +265,7 @@ class QuantFlowRequestHandler(SimpleHTTPRequestHandler):
                     if strategy_id:
                         if "strategy_id" in df_trades.columns:
                             df_trades = df_trades[df_trades["strategy_id"] == strategy_id]
-                    trades = df_trades.head(500).to_dict(orient="records")
+                    trades = df_trades.head(limit_val).to_dict(orient="records")
 
             data = {
                 "kpis": kpis,

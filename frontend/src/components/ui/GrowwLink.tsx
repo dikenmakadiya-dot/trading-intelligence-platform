@@ -14,12 +14,18 @@ export const GrowwLink: React.FC<GrowwLinkProps> = ({
   className = '',
   variant = 'button'
 }) => {
-  if (!url) return null;
+  const effectiveUrl =
+    url ||
+    (symbol
+      ? `https://groww.in/charts/stocks/${symbol.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-ltd?exchange=NSE`
+      : '');
+
+  if (!effectiveUrl) return null;
 
   if (variant === 'icon') {
     return (
       <a
-        href={url}
+        href={effectiveUrl}
         target="_blank"
         rel="noopener noreferrer"
         title={`Open ${symbol || 'stock'} on Groww Chart (NSE)`}
@@ -34,7 +40,7 @@ export const GrowwLink: React.FC<GrowwLinkProps> = ({
   if (variant === 'compact') {
     return (
       <a
-        href={url}
+        href={effectiveUrl}
         target="_blank"
         rel="noopener noreferrer"
         title={`Open ${symbol || 'stock'} on Groww Chart`}
@@ -49,7 +55,7 @@ export const GrowwLink: React.FC<GrowwLinkProps> = ({
 
   return (
     <a
-      href={url}
+      href={effectiveUrl}
       target="_blank"
       rel="noopener noreferrer"
       className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 border border-sky-500/30 hover:border-sky-400 transition-all shadow-sm active:scale-95 ${className}`}

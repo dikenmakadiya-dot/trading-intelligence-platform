@@ -37,10 +37,9 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
     });
   }, [all_signals_unified, searchQuery, strategyFilter]);
 
-  // 5 Portfolio Slot rendering
+  // Portfolio Slots rendering (at least 5 capacity slots)
   const totalSlots = 5;
-  const filledSlots = positions.slice(0, totalSlots);
-  const emptySlotsCount = Math.max(0, totalSlots - filledSlots.length);
+  const emptySlotsCount = Math.max(0, totalSlots - positions.length);
 
   return (
     <div className="space-y-6">
@@ -104,9 +103,9 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
             </div>
           </div>
 
-          {/* 5 Slots Grid */}
+          {/* Slots Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {filledSlots.map((pos) => {
+            {positions.map((pos) => {
               const isProfit = (pos.unrealized_pnl_pct || 0) >= 0;
               return (
                 <div
@@ -127,7 +126,7 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
                     <div>
                       <div className="text-[10px] text-slate-400">Entry / LTP</div>
                       <div className="font-mono text-slate-200 tabular-nums">
-                        ₹{pos.entry_price.toFixed(1)} &rarr; ₹{pos.current_price.toFixed(1)}
+                        ₹{(pos.entry_price || 0).toFixed(1)} &rarr; ₹{(pos.current_price || 0).toFixed(1)}
                       </div>
                     </div>
                     <div className="text-right">
@@ -136,14 +135,14 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
                         isProfit ? 'text-trade-bullish' : 'text-trade-bearish'
                       }`}>
                         {isProfit ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                        {isProfit ? '+' : ''}{pos.unrealized_pnl_pct.toFixed(2)}%
+                        {isProfit ? '+' : ''}{(pos.unrealized_pnl_pct || 0).toFixed(2)}%
                       </div>
                     </div>
                   </div>
 
                   <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
-                    <span>Held: {pos.days_held}d</span>
-                    <span>SL: ₹{pos.trailing_sl.toFixed(1)}</span>
+                    <span>Held: {pos.days_held || 0}d</span>
+                    <span>SL: ₹{(pos.trailing_sl || 0).toFixed(1)}</span>
                   </div>
                 </div>
               );
@@ -156,7 +155,7 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
                 className="p-4 rounded-xl border border-dashed border-slate-800 flex flex-col items-center justify-center text-center text-slate-600 space-y-1 min-h-[110px]"
               >
                 <div className="w-6 h-6 rounded-full border border-dashed border-slate-700 flex items-center justify-center text-xs font-mono">
-                  {filledSlots.length + idx + 1}
+                  {positions.length + idx + 1}
                 </div>
                 <span className="text-xs font-medium text-slate-400">Available Cash Slot</span>
                 <span className="text-[10px] text-slate-400">Ready for Day T+1 Trigger</span>
@@ -266,13 +265,13 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
                       ₹{(sig.close || sig.close_price || 0).toFixed(2)}
                     </td>
                     <td className="py-3 px-3 text-right text-sky-400 font-bold tabular-nums">
-                      ₹{sig.entry_trigger.toFixed(2)}
+                      ₹{(sig.entry_trigger ?? 0).toFixed(2)}
                     </td>
                     <td className="py-3 px-3 text-right text-rose-400 tabular-nums">
-                      ₹{sig.trailing_sl.toFixed(2)}
+                      ₹{(sig.trailing_sl ?? 0).toFixed(2)}
                     </td>
                     <td className="py-3 px-3 text-right text-emerald-400 tabular-nums">
-                      {sig.target_price ? `₹${sig.target_price.toFixed(2)}` : 'Trailing'}
+                      {sig.target_price ? `₹${Number(sig.target_price).toFixed(2)}` : 'Trailing'}
                     </td>
                     <td className="py-3 px-3 text-center font-sans">
                       <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
