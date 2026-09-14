@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuantFlow UI/UX Design System Overhaul - Chrome Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
+          },
+          colors: {
+            obsidian: {
+              950: '#030712',
+              900: '#060B18',
+              850: '#0A1024',
+              800: '#0F172E',
+              700: '#1E294B',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom High-Fidelity UI Styling Tokens */
+    :root {
+      --bg-base: #040714;
+      --card-bg: rgba(10, 16, 36, 0.75);
+      --card-border: rgba(56, 189, 248, 0.12);
+      --accent-primary: #00E5FF;
+      --accent-secondary: #10B981;
+      --accent-warning: #F59E0B;
+      --accent-danger: #FF3366;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: #F8FAFC;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .font-mono, .tabular-nums {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Ambient Background Glow */
+    .ambient-glow {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1000px;
+      height: 400px;
+      background: radial-gradient(circle 500px at 50% -10%, rgba(0, 229, 255, 0.08), rgba(16, 185, 129, 0.04), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Specular Glass Card */
+    .glass-card-premium {
+      background: linear-gradient(135deg, rgba(14, 23, 49, 0.82) 0%, rgba(8, 14, 30, 0.88) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(56, 189, 248, 0.14);
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      position: relative;
+    }
+
+    .glass-card-premium::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.4), transparent);
+      opacity: 0.6;
+      border-radius: inherit;
+    }
+
+    .glass-card-premium:hover {
+      border-color: rgba(0, 229, 255, 0.35);
+      box-shadow: 0 14px 40px -5px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 229, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Neon Beacon Pulse */
+    @keyframes beaconPulse {
+      0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+      50% { opacity: 0.8; transform: scale(1.05); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    }
+    .beacon-pulse {
+      animation: beaconPulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+    }
+
+    /* Concept Specific Themes */
+    .theme-quantum {
+      --bg-base: #030712;
+      --card-bg: rgba(10, 16, 36, 0.78);
+      --card-border: rgba(0, 229, 255, 0.16);
+      --primary-accent: #00E5FF;
+      --bullish-accent: #00FF9D;
+    }
+
+    .theme-linear {
+      --bg-base: #0B0E14;
+      --card-bg: rgba(18, 22, 32, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary-accent: #8B5CF6;
+      --bullish-accent: #10B981;
+    }
+
+    .theme-tokyo {
+      --bg-base: #04050A;
+      --card-bg: rgba(8, 12, 24, 0.9);
+      --card-border: rgba(255, 184, 0, 0.18);
+      --primary-accent: #FFD600;
+      --bullish-accent: #00FF88;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #030712; }
+    ::-webkit-scrollbar-thumb { background: #1E294B; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00E5FF; }
+  </style>
+</head>
+<body class="theme-quantum min-h-screen relative selection:bg-cyan-500 selection:text-black">
+
+  <div class="ambient-glow" id="ambientGlow"></div>
+
+  <!-- Redesign Switcher Bar (Sticky Top Banner for Review) -->
+  <aside class="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-xl border-b border-cyan-500/20 px-4 py-2.5 shadow-2xl">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 font-black text-xs border border-cyan-400/40 shadow-sm">
+          UI
+        </span>
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-300">
+          Design Concept Switcher &bull; <span class="text-cyan-400">Review &amp; Selection</span>
+        </span>
+      </div>
+
+      <!-- Theme Selector Buttons -->
+      <div class="flex items-center gap-1.5 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+        <button onclick="switchTheme('quantum')" id="btn-quantum" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm">
+          1. Quantum Obsidian (High-Contrast Neon)
+        </button>
+        <button onclick="switchTheme('linear')" id="btn-linear" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent">
+          2. Linear Titanium (Minimalist Luxury)
+        </button>
+        <button onclick="switchTheme('tokyo')" id="btn-tokyo" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent">
+          3. Tokyo Cyber Matrix (Bloomberg 2026)
+        </button>
+      </div>
+
+      <div class="text-[11px] text-slate-400 font-mono hidden md:block">
+        Press <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">1</kbd>, <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">2</kbd>, or <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-200 border border-slate-700">3</kbd> to toggle
+      </div>
+    </div>
+  </aside>
+
+  <!-- Redesigned Main Application Shell -->
+  <div class="relative z-10 flex flex-col min-h-screen">
+    
+    <!-- Redesigned Institutional Header / Navigation -->
+    <header class="w-full bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 px-4 py-3.5 sm:px-8">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        
+        <!-- Brand & Intelligence Nexus Pill -->
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 via-emerald-500 to-teal-400 p-[1px] shadow-lg shadow-cyan-500/20">
+              <div class="w-full h-full bg-slate-950 rounded-[15px] flex items-center justify-center">
+                <svg class="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                  <polyline points="16 7 22 7 22 13"></polyline>
+                </svg>
+              </div>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-extrabold text-lg tracking-tight text-white font-sans">
+                  QUANT<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">FLOW</span>
+                </span>
+                <span class="text-[10px] font-mono font-bold tracking-widest px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+                  INSTITUTIONAL
+                </span>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
+                <span>NIFTY 750 (500 + Microcap 250)</span>
+                <span class="text-slate-600">&bull;</span>
+                <span class="text-slate-400 font-mono">Cutler RSI-14 &bull; SuperTrend &bull; BB(20,2)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Intelligence Pulse Bar -->
+        <div class="hidden lg:flex items-center gap-3 bg-slate-900/80 px-4 py-2 rounded-2xl border border-slate-800/90 shadow-inner">
+          <div class="flex items-center gap-2">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="beacon-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span class="text-xs font-bold text-slate-200">ORCHESTRATOR LIVE</span>
+          </div>
+          <span class="text-slate-700">|</span>
+          <div class="text-xs text-slate-400 font-mono">
+            SYNC: <span class="text-slate-200 font-semibold">11-Sep-2026 16:15 IST</span>
+          </div>
+          <span class="text-slate-700">|</span>
+          <div class="text-xs font-bold text-emerald-400 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span>GATE: OPEN (54.2%)</span>
+          </div>
+        </div>
+
+        <!-- 1-Tap Trigger Action -->
+        <div class="flex items-center gap-3">
+          <button class="relative group flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 text-cyan-300 hover:text-white border border-cyan-500/40 hover:border-cyan-400 shadow-lg shadow-cyan-950/50 hover:shadow-cyan-500/20 active:scale-95 transition-all">
+            <svg class="w-4 h-4 text-cyan-400 group-hover:rotate-180 transition-transform duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+            </svg>
+            <span>Scan Market Now</span>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Sub-Navbar: Navigation Tabs -->
+    <nav class="border-b border-slate-800/80 bg-slate-950/40 backdrop-blur-md px-4 sm:px-8">
+      <div class="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto py-2">
+        <button class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shadow-sm">
+          <svg class="w-4 h-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Signal Nexus (Master Stage)</span>
+          <span class="ml-1 font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-200">2 TRIGGERS</span>
+        </button>
+
+        <button class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900/60 transition-all">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span>Strategy 1: 3-Day RSI + 52W High</span>
+        </button>
+
+        <button class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900/60 transition-all">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Strategy 2: 5Y Clean Candle Breakout</span>
+        </button>
+
+        <button class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900/60 transition-all">
+          <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+          <span>Strategy 3: GFS Multi-Timeframe</span>
+        </button>
+
+        <button class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-900/60 transition-all ml-auto">
+          <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>Health &amp; Backups</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Master Stage Content Body -->
+    <main class="max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+      <!-- TOP METRIC CARDS / REGIME & PORTFOLIO SNAPSHOT -->
+      <section class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        
+        <!-- Card 1: Market Regime Gauge (Sleek Modernized) -->
+        <div class="glass-card-premium rounded-2xl p-5 flex flex-col justify-between relative">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold tracking-wider uppercase text-slate-400">Macro Breadth Gate</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              GATE OPEN
+            </span>
+          </div>
+
+          <!-- Gauge Display -->
+          <div class="my-4 flex items-center justify-center">
+            <div class="relative flex flex-col items-center justify-center">
+              <svg class="w-36 h-24" viewBox="0 0 160 100">
+                <!-- Background Arc -->
+                <path d="M 20 90 A 60 60 0 0 1 140 90" fill="none" stroke="#1E293B" stroke-width="14" stroke-linecap="round" />
+                <!-- Active Value Arc (54.2% -> green) -->
+                <path d="M 20 90 A 60 60 0 0 1 105 35" fill="none" stroke="url(#cyanGreenGrad)" stroke-width="14" stroke-linecap="round" />
+                <defs>
+                  <linearGradient id="cyanGreenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#00E5FF" />
+                    <stop offset="100%" stop-color="#10B981" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="absolute bottom-1 flex flex-col items-center">
+                <span class="font-mono text-2xl font-extrabold text-white tabular-nums tracking-tight">54.2%</span>
+                <span class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">271 / 500 &gt; EMA50</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800/80 text-[11px] text-emerald-400/90 text-center font-medium">
+            Bullish regime confirmed. Breakout buys permitted.
+          </div>
+        </div>
+
+        <!-- Card 2: Active Portfolio Capacity Slots -->
+        <div class="glass-card-premium rounded-2xl p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold tracking-wider uppercase text-slate-400">Portfolio Slots</span>
+            <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-lg bg-slate-800/80 text-cyan-300 border border-slate-700 tabular-nums">
+              2 / 5 FILLED
+            </span>
+          </div>
+
+          <div class="my-3 space-y-2">
+            <!-- Slot 1 -->
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/90">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span class="font-mono font-bold text-xs text-white">VBL</span>
+                <span class="text-[10px] text-slate-500 font-mono">Day 8</span>
+              </div>
+              <div class="flex items-center gap-2 font-mono text-xs">
+                <span class="text-emerald-400 font-bold tabular-nums">+14.2%</span>
+                <a href="https://groww.in/charts/stocks/varun-beverages-ltd?exchange=NSE" target="_blank" class="p-1 rounded bg-slate-800 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-300 transition-colors" title="Open Groww Chart">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                </a>
+              </div>
+            </div>
+
+            <!-- Slot 2 -->
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/90">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span class="font-mono font-bold text-xs text-white">TRENT</span>
+                <span class="text-[10px] text-slate-500 font-mono">Day 12</span>
+              </div>
+              <div class="flex items-center gap-2 font-mono text-xs">
+                <span class="text-emerald-400 font-bold tabular-nums">+6.8%</span>
+                <a href="https://groww.in/charts/stocks/trent-ltd?exchange=NSE" target="_blank" class="p-1 rounded bg-slate-800 hover:bg-cyan-500/20 text-slate-400 hover:text-cyan-300 transition-colors">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                </a>
+              </div>
+            </div>
+
+            <!-- Available Slots -->
+            <div class="p-2 rounded-xl border border-dashed border-slate-800 text-center text-[11px] text-slate-500 font-mono">
+              + 3 Available Cash Slots (60% Liquidity)
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+            <span class="text-slate-400">Unrealized P&amp;L</span>
+            <span class="font-mono font-bold text-emerald-400 tabular-nums">+₹42,300 (+10.5%)</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Today's Actionable Breakouts -->
+        <div class="glass-card-premium rounded-2xl p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold tracking-wider uppercase text-slate-400">Fresh Triggers</span>
+            <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+              2 STOCKS
+            </span>
+          </div>
+
+          <div class="my-3 space-y-2">
+            <div class="p-2.5 rounded-xl bg-slate-900/90 border border-cyan-500/30 hover:border-cyan-400 transition-all">
+              <div class="flex items-center justify-between">
+                <span class="font-mono font-extrabold text-sm text-white">TATAMOTORS</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">3-Day RSI</span>
+              </div>
+              <div class="mt-1 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                <span>Trigger: <span class="text-white font-bold">₹1,046.00</span></span>
+                <span class="text-cyan-400">Vol: 3.4x</span>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded-xl bg-slate-900/90 border border-emerald-500/30 hover:border-emerald-400 transition-all">
+              <div class="flex items-center justify-between">
+                <span class="font-mono font-extrabold text-sm text-white">BEL</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">5Y High</span>
+              </div>
+              <div class="mt-1 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                <span>Trigger: <span class="text-white font-bold">₹315.00</span></span>
+                <span class="text-emerald-400">Target: +8.0%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 text-center font-mono">
+            Execute at tomorrow's market open (9:15 AM)
+          </div>
+        </div>
+
+        <!-- Card 4: Quantitative Edge & Performance KPIs -->
+        <div class="glass-card-premium rounded-2xl p-5 flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold tracking-wider uppercase text-slate-400">Verified System KPIs</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">5Y BACKTEST</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 my-2">
+            <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+              <div class="text-[10px] text-slate-500 font-bold uppercase">Strategy CAGR</div>
+              <div class="font-mono text-lg font-extrabold text-emerald-400 tabular-nums">+32.4%</div>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+              <div class="text-[10px] text-slate-500 font-bold uppercase">Win Rate</div>
+              <div class="font-mono text-lg font-extrabold text-cyan-400 tabular-nums">58.6%</div>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+              <div class="text-[10px] text-slate-500 font-bold uppercase">Profit Factor</div>
+              <div class="font-mono text-lg font-extrabold text-white tabular-nums">2.31</div>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800">
+              <div class="text-[10px] text-slate-500 font-bold uppercase">Max Drawdown</div>
+              <div class="font-mono text-lg font-extrabold text-rose-400 tabular-nums">-18.4%</div>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Expectancy</span>
+            <span class="font-mono font-bold text-emerald-400">+₹8,450 / trade</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- UNIFIED FRESH BREAKOUT SIGNALS TABLE (INSTITUTIONAL GRADE) -->
+      <section class="glass-card-premium rounded-2xl p-6 space-y-4">
+        
+        <!-- Table Header & Multi-Facet Filters -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-base font-extrabold text-white flex items-center gap-2">
+              <span>Actionable Breakout Signals Matrix</span>
+              <span class="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                2 Ready to Trade
+              </span>
+            </h2>
+            <p class="text-xs text-slate-400">
+              Filtered for tomorrow morning execution. Click any symbol to open official interactive Groww chart.
+            </p>
+          </div>
+
+          <!-- Controls: Search & Strategy Filter -->
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="relative">
+              <input 
+                type="text" 
+                placeholder="Search symbol, industry..." 
+                class="w-56 px-3 py-1.5 pl-8 rounded-xl text-xs bg-slate-900/90 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors font-mono"
+              >
+              <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+
+            <!-- Strategy Quick Filters -->
+            <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+              <button class="px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">All</button>
+              <button class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">3D RSI</button>
+              <button class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">5Y Breakout</button>
+              <button class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">GFS MTF</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="overflow-x-auto rounded-xl border border-slate-800/90 bg-slate-950/60">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-slate-800 bg-slate-900/70 text-slate-400 font-mono text-[11px] uppercase tracking-wider">
+                <th class="py-3 px-4">Symbol &amp; Company</th>
+                <th class="py-3 px-4">Strategy Engine</th>
+                <th class="py-3 px-4 text-right">LTP (₹)</th>
+                <th class="py-3 px-4 text-right">Trigger Entry</th>
+                <th class="py-3 px-4 text-right">Stop Loss / Exit</th>
+                <th class="py-3 px-4 text-center">Indicators (RSI / Vol)</th>
+                <th class="py-3 px-4 text-center">Chart &amp; Execution</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800/60 font-mono">
+              
+              <!-- Row 1: TATAMOTORS -->
+              <tr class="hover:bg-slate-900/50 transition-colors group">
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-xs">
+                      TM
+                    </div>
+                    <div>
+                      <div class="font-bold text-white text-sm group-hover:text-cyan-400 transition-colors flex items-center gap-1.5">
+                        TATAMOTORS
+                        <span class="text-[10px] font-sans font-medium text-slate-400 px-1.5 py-0.2 rounded bg-slate-800 border border-slate-700">NIFTY 500</span>
+                      </div>
+                      <div class="text-[11px] text-slate-400 font-sans">Tata Motors Limited &bull; Passenger &amp; EV Cars</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 font-sans">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    3-Day RSI UP + 52W High
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <span class="text-white font-bold text-sm tabular-nums">₹1,045.50</span>
+                  <div class="text-[10px] text-emerald-400">+2.84% today</div>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <span class="text-cyan-400 font-bold text-sm tabular-nums">₹1,046.00</span>
+                  <div class="text-[10px] text-slate-500 font-sans">Breakout High</div>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <span class="text-rose-400 font-bold text-sm tabular-nums">₹1,012.00</span>
+                  <div class="text-[10px] text-slate-500">-3.2% (1.5x ATR)</div>
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  <div class="inline-flex flex-col items-center gap-0.5">
+                    <span class="text-xs font-bold text-white">RSI: 64.2 <span class="text-emerald-400">&uarr;</span></span>
+                    <span class="text-[10px] text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800">Vol: 3.4x SMA10</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  <a 
+                    href="https://groww.in/charts/stocks/tata-motors-ltd?exchange=NSE" 
+                    target="_blank"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-sans font-bold text-xs bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 hover:border-emerald-400 shadow-sm transition-all active:scale-95"
+                  >
+                    <span>Groww Chart</span>
+                    <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                  </a>
+                </td>
+              </tr>
+
+              <!-- Row 2: BEL -->
+              <tr class="hover:bg-slate-900/50 transition-colors group">
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-xs">
+                      BEL
+                    </div>
+                    <div>
+                      <div class="font-bold text-white text-sm group-hover:text-cyan-400 transition-colors flex items-center gap-1.5">
+                        BEL
+                        <span class="text-[10px] font-sans font-medium text-slate-400 px-1.5 py-0.2 rounded bg-slate-800 border border-slate-700">NIFTY 500</span>
+                      </div>
+                      <div class="text-[11px] text-slate-400 font-sans">Bharat Electronics Limited &bull; Aerospace &amp; Defense</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 font-sans">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    5-Year Clean Candle Breakout
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <span class="text-white font-bold text-sm tabular-nums">₹314.80</span>
+                  <div class="text-[10px] text-emerald-400">+4.12% today</div>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <span class="text-cyan-400 font-bold text-sm tabular-nums">₹315.00</span>
+                  <div class="text-[10px] text-slate-500 font-sans">Market Open</div>
+                </td>
+                <td class="py-3.5 px-4 text-right">
+                  <span class="text-rose-400 font-bold text-sm tabular-nums">₹304.50</span>
+                  <div class="text-[10px] text-emerald-400 font-sans">Target: ₹340.20 (+8%)</div>
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  <div class="inline-flex flex-col items-center gap-0.5">
+                    <span class="text-xs font-bold text-white">Body Ratio: 78%</span>
+                    <span class="text-[10px] text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">RSI &Delta;: +9.4 pts</span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  <a 
+                    href="https://groww.in/charts/stocks/bharat-electronics-ltd?exchange=NSE" 
+                    target="_blank"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-sans font-bold text-xs bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 hover:border-emerald-400 shadow-sm transition-all active:scale-95"
+                  >
+                    <span>Groww Chart</span>
+                    <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                  </a>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+      <!-- HISTORICAL PERFORMANCE EQUITY CURVE & MATRIX MOCKUP -->
+      <section class="glass-card-premium rounded-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-extrabold text-white">Compounding Equity Curve vs Benchmark</h3>
+            <p class="text-xs text-slate-400">Institutional 5-Year simulation verified against actual Bhavcopy executions</p>
+          </div>
+          <div class="flex items-center gap-2 font-mono text-xs">
+            <span class="flex items-center gap-1.5 text-emerald-400 font-bold">
+              <span class="w-3 h-0.5 bg-emerald-400 rounded"></span> Strategy (+328.4%)
+            </span>
+            <span class="flex items-center gap-1.5 text-slate-500 font-medium">
+              <span class="w-3 h-0.5 bg-slate-600 rounded"></span> NIFTY 500 (+94.2%)
+            </span>
+          </div>
+        </div>
+
+        <!-- Simulated SVG Equity Chart -->
+        <div class="w-full h-48 rounded-xl bg-slate-950/70 border border-slate-800/80 p-3 relative overflow-hidden flex items-end">
+          <svg class="w-full h-full" viewBox="0 0 800 150" preserveAspectRatio="none">
+            <!-- Grid Lines -->
+            <line x1="0" y1="30" x2="800" y2="30" stroke="#1E293B" stroke-dasharray="4 4" stroke-width="1"/>
+            <line x1="0" y1="75" x2="800" y2="75" stroke="#1E293B" stroke-dasharray="4 4" stroke-width="1"/>
+            <line x1="0" y1="120" x2="800" y2="120" stroke="#1E293B" stroke-dasharray="4 4" stroke-width="1"/>
+
+            <!-- Benchmark Line -->
+            <path d="M 0 130 Q 200 120, 400 100 T 800 70" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="3 3"/>
+
+            <!-- Strategy Area & Line -->
+            <defs>
+              <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#00E5FF" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 0 135 C 100 130, 200 110, 300 95 C 400 105, 500 65, 600 50 C 700 35, 750 25, 800 15 L 800 150 L 0 150 Z" fill="url(#curveGradient)"/>
+            <path d="M 0 135 C 100 130, 200 110, 300 95 C 400 105, 500 65, 600 50 C 700 35, 750 25, 800 15" fill="none" stroke="#00E5FF" stroke-width="3"/>
+          </svg>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Redesigned Footer -->
+    <footer class="mt-auto border-t border-slate-900 bg-slate-950/80 px-4 py-4 text-center text-xs text-slate-500 font-mono">
+      QuantFlow Intelligence Platform &bull; Antigravity Quantitative Workbench &bull; NIFTY 750 Universe
+    </footer>
+
+  </div>
+
+  <script>
+    function switchTheme(theme) {
+      const body = document.body;
+      const glow = document.getElementById('ambientGlow');
+      const bQuantum = document.getElementById('btn-quantum');
+      const bLinear = document.getElementById('btn-linear');
+      const bTokyo = document.getElementById('btn-tokyo');
+
+      body.classList.remove('theme-quantum', 'theme-linear', 'theme-tokyo');
+      bQuantum.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent";
+      bLinear.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent";
+      bTokyo.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent";
+
+      if (theme === 'quantum') {
+        body.classList.add('theme-quantum');
+        glow.style.background = 'radial-gradient(circle 500px at 50% -10%, rgba(0, 229, 255, 0.12), rgba(16, 185, 129, 0.06), transparent 70%)';
+        bQuantum.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm";
+      } else if (theme === 'linear') {
+        body.classList.add('theme-linear');
+        glow.style.background = 'radial-gradient(circle 500px at 50% -10%, rgba(139, 92, 246, 0.14), rgba(59, 130, 246, 0.08), transparent 70%)';
+        bLinear.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm";
+      } else if (theme === 'tokyo') {
+        body.classList.add('theme-tokyo');
+        glow.style.background = 'radial-gradient(circle 500px at 50% -10%, rgba(255, 214, 0, 0.12), rgba(0, 255, 136, 0.06), transparent 70%)';
+        bTokyo.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm";
+      }
+    }
+
+    // Keyboard shortcuts: 1, 2, 3
+    window.addEventListener('keydown', (e) => {
+      if (e.key === '1') switchTheme('quantum');
+      if (e.key === '2') switchTheme('linear');
+      if (e.key === '3') switchTheme('tokyo');
+    });
+  </script>
+</body>
+</html>

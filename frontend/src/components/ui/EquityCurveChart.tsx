@@ -45,8 +45,8 @@ export const EquityCurveChart: React.FC<EquityCurveChartProps> = ({ data, height
 
   if (!chartData || chartData.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-slate-500 text-sm">
-        No equity curve data available. Run backtest refresh to generate historical data.
+      <div className="flex items-center justify-center h-64 text-slate-500 text-sm font-mono">
+        No equity curve data available. Trigger backtest refresh to generate historical data.
       </div>
     );
   }
@@ -71,7 +71,6 @@ export const EquityCurveChart: React.FC<EquityCurveChartProps> = ({ data, height
     const bottom = height - 20;
     const top = equityHeight + 30;
     const ddRange = Math.abs(maxDD) || 1;
-    // dd is negative: 0 at top, maxDD at bottom
     const norm = Math.abs(dd) / ddRange;
     return top + norm * (bottom - top);
   };
@@ -101,128 +100,123 @@ export const EquityCurveChart: React.FC<EquityCurveChartProps> = ({ data, height
       <div className="flex flex-wrap items-center justify-between gap-4 mb-3 px-2">
         <div className="flex items-center gap-4">
           <div>
-            <div className="text-xs font-medium text-slate-400">Selected Date</div>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">Selected Date</div>
             <div className="font-mono text-sm font-bold text-white tabular-nums">
               {hoveredPoint?.date || '--'}
             </div>
           </div>
           <div>
-            <div className="text-xs font-medium text-slate-400">Equity Value</div>
-            <div className="font-mono text-sm font-bold text-trade-bullish tabular-nums">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">Portfolio Equity</div>
+            <div className="font-mono text-sm font-extrabold text-cyan-400 tabular-nums drop-shadow-[0_0_8px_rgba(0,229,255,0.3)]">
               ₹{(hoveredPoint?.portfolio_value || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
             </div>
           </div>
           <div>
-            <div className="text-xs font-medium text-slate-400">Underwater DD</div>
-            <div className={`font-mono text-sm font-bold tabular-nums ${hoveredPoint?.drawdown < -10 ? 'text-trade-bearish' : 'text-slate-300'}`}>
+            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">Underwater Drawdown</div>
+            <div className={`font-mono text-sm font-bold tabular-nums ${hoveredPoint?.drawdown < -10 ? 'text-rose-400 font-extrabold' : 'text-slate-300'}`}>
               {(hoveredPoint?.drawdown || 0).toFixed(2)}%
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 text-xs">
-          <span className="flex items-center gap-1.5 text-slate-400">
-            <span className="w-3 h-0.5 bg-trade-bullish rounded-full"></span>
-            Strategy Equity
+        <div className="flex items-center gap-3 text-xs font-mono">
+          <span className="flex items-center gap-1.5 text-cyan-400 font-bold">
+            <span className="w-3 h-0.5 bg-cyan-400 rounded"></span> Strategy Curve
           </span>
-          <span className="flex items-center gap-1.5 text-slate-400">
-            <span className="w-3 h-0.5 bg-rose-500 rounded-full"></span>
-            Drawdown %
+          <span className="flex items-center gap-1.5 text-rose-400/80">
+            <span className="w-3 h-0.5 bg-rose-500/80 rounded"></span> Drawdown
           </span>
         </div>
       </div>
 
-      {/* SVG Chart Pane */}
-      <div className="w-full overflow-hidden">
+      {/* Interactive SVG Chart */}
+      <div className="w-full bg-slate-950/80 rounded-2xl border border-slate-800/90 p-2 relative overflow-hidden shadow-inner">
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="w-full h-auto"
+          className="w-full h-auto overflow-visible cursor-crosshair"
           onMouseLeave={() => setHoverIndex(null)}
           onMouseMove={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
-            const mouseX = ((e.clientX - rect.left) / rect.width) * width;
-            if (mouseX >= paddingX && mouseX <= width - 20) {
-              const pct = (mouseX - paddingX) / (width - paddingX - 20);
-              const idx = Math.round(pct * (chartData.length - 1));
-              setHoverIndex(Math.max(0, Math.min(chartData.length - 1, idx)));
-            }
+            const relX = ((e.clientX - rect.left) / rect.width) * width;
+            const denom = width - paddingX - 20;
+            const fraction = Math.max(0, Math.min(1, (relX - paddingX) / denom));
+            const idx = Math.round(fraction * (chartData.length - 1));
+            setHoverIndex(idx);
           }}
         >
           <defs>
-            <linearGradient id="equityGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#22C55E" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#22C55E" stopOpacity="0.0" />
+            {/* Strategy Area Gradient */}
+            <linearGradient id="quantumAreaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.30" />
+              <stop offset="60%" stopColor="#10B981" stopOpacity="0.08" />
+              <stop offset="100%" stopColor="#030712" stopOpacity="0.0" />
             </linearGradient>
-            <linearGradient id="ddGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#EF4444" stopOpacity="0.0" />
-              <stop offset="100%" stopColor="#EF4444" stopOpacity="0.3" />
+
+            {/* Drawdown Area Gradient */}
+            <linearGradient id="quantumDDAreaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#FF3366" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#FF3366" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
-          {/* Grid Lines & Labels */}
-          <g className="text-slate-600 font-mono text-[10px]">
-            {/* Top / Mid / Bottom Equity Lines */}
-            <line x1={paddingX} y1={paddingY} x2={width - 20} y2={paddingY} stroke="#1E293B" strokeDasharray="3,3" />
-            <text x={paddingX - 8} y={paddingY + 3} textAnchor="end" fill="#64748B">
-              ₹{(maxVal / 100000).toFixed(1)}L
-            </text>
+          {/* Grid lines */}
+          <line x1={paddingX} y1={paddingY} x2={width - 20} y2={paddingY} stroke="#172445" strokeDasharray="3,3" opacity="0.6" />
+          <line x1={paddingX} y1={equityHeight / 2} x2={width - 20} y2={equityHeight / 2} stroke="#172445" strokeDasharray="3,3" opacity="0.6" />
+          <line x1={paddingX} y1={equityHeight} x2={width - 20} y2={equityHeight} stroke="#172445" opacity="0.8" />
+          <line x1={paddingX} y1={equityHeight + 30} x2={width - 20} y2={equityHeight + 30} stroke="#172445" strokeDasharray="3,3" opacity="0.6" />
+          <line x1={paddingX} y1={height - 20} x2={width - 20} y2={height - 20} stroke="#172445" opacity="0.8" />
 
-            <line x1={paddingX} y1={equityHeight / 2} x2={width - 20} y2={equityHeight / 2} stroke="#1E293B" strokeDasharray="3,3" />
-            <text x={paddingX - 8} y={equityHeight / 2 + 3} textAnchor="end" fill="#64748B">
-              ₹{(((maxVal + minVal) / 2) / 100000).toFixed(1)}L
-            </text>
+          {/* Y-Axis Labels (Equity) */}
+          <text x={paddingX - 8} y={paddingY + 4} fill="#64748B" fontSize="10" fontFamily="JetBrains Mono" textAnchor="end">
+            ₹{(maxVal / 100000).toFixed(1)}L
+          </text>
+          <text x={paddingX - 8} y={equityHeight - 4} fill="#64748B" fontSize="10" fontFamily="JetBrains Mono" textAnchor="end">
+            ₹{(minVal / 100000).toFixed(1)}L
+          </text>
 
-            <line x1={paddingX} y1={equityHeight} x2={width - 20} y2={equityHeight} stroke="#334155" />
-            <text x={paddingX - 8} y={equityHeight + 3} textAnchor="end" fill="#64748B">
-              ₹{(minVal / 100000).toFixed(1)}L
-            </text>
+          {/* Y-Axis Labels (Drawdown) */}
+          <text x={paddingX - 8} y={equityHeight + 34} fill="#64748B" fontSize="10" fontFamily="JetBrains Mono" textAnchor="end">
+            0%
+          </text>
+          <text x={paddingX - 8} y={height - 22} fill="#FF3366" fontSize="10" fontFamily="JetBrains Mono" textAnchor="end">
+            {maxDD.toFixed(0)}%
+          </text>
 
-            {/* Drawdown baseline & bottom */}
-            <line x1={paddingX} y1={equityHeight + 30} x2={width - 20} y2={equityHeight + 30} stroke="#334155" />
-            <text x={paddingX - 8} y={equityHeight + 33} textAnchor="end" fill="#64748B">0%</text>
+          {/* Area Fills */}
+          <path d={equityAreaPath} fill="url(#quantumAreaGradient)" />
+          <path d={ddAreaPath} fill="url(#quantumDDAreaGradient)" />
 
-            <line x1={paddingX} y1={height - 20} x2={width - 20} y2={height - 20} stroke="#1E293B" strokeDasharray="3,3" />
-            <text x={paddingX - 8} y={height - 17} textAnchor="end" fill="#EF4444">
-              {maxDD.toFixed(1)}%
-            </text>
-          </g>
+          {/* Line Strokes */}
+          <path d={equityPath} fill="none" stroke="#00E5FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path d={ddPath} fill="none" stroke="#FF3366" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
 
-          {/* Equity Shaded Area */}
-          <path d={equityAreaPath} fill="url(#equityGradient)" />
-          {/* Equity Line */}
-          <path d={equityPath} fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" />
-
-          {/* Drawdown Shaded Area */}
-          <path d={ddAreaPath} fill="url(#ddGradient)" />
-          {/* Drawdown Line */}
-          <path d={ddPath} fill="none" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round" />
-
-          {/* Interactive Hover Crosshair */}
-          {hoverIndex !== null && (
+          {/* Hover Crosshair Guide */}
+          {hoverIndex !== null && chartData[hoverIndex] && (
             <g>
               <line
                 x1={getX(hoverIndex)}
                 y1={paddingY}
                 x2={getX(hoverIndex)}
                 y2={height - 20}
-                stroke="#38BDF8"
-                strokeWidth="1"
+                stroke="#00E5FF"
+                strokeWidth="1.5"
                 strokeDasharray="2,2"
+                opacity="0.8"
               />
               <circle
                 cx={getX(hoverIndex)}
-                cy={getEquityY(hoveredPoint.portfolio_value)}
+                cy={getEquityY(chartData[hoverIndex].portfolio_value)}
+                r="5"
+                fill="#00E5FF"
+                stroke="#030712"
+                strokeWidth="2.5"
+              />
+              <circle
+                cx={getX(hoverIndex)}
+                cy={getDDY(chartData[hoverIndex].drawdown)}
                 r="4"
-                fill="#22C55E"
-                stroke="#020617"
-                strokeWidth="2"
-              />
-              <circle
-                cx={getX(hoverIndex)}
-                cy={getDDY(hoveredPoint.drawdown)}
-                r="3.5"
-                fill="#EF4444"
-                stroke="#020617"
+                fill="#FF3366"
+                stroke="#030712"
                 strokeWidth="2"
               />
             </g>

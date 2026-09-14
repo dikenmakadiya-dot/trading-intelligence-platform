@@ -44,7 +44,7 @@ export const MobileDock: React.FC<MobileDockProps> = ({
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-lg border-t border-slate-800 safe-bottom">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-t border-cyan-500/20 shadow-2xl safe-bottom">
       <div className="grid grid-cols-5 h-16 max-w-lg mx-auto">
         {items.map((item) => {
           const isActive = activeTab === item.id;
@@ -52,23 +52,25 @@ export const MobileDock: React.FC<MobileDockProps> = ({
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center justify-center min-h-[48px] relative transition-colors ${
-                isActive ? 'text-trade-accent' : 'text-slate-400 hover:text-slate-200'
+              className={`flex flex-col items-center justify-center min-h-[48px] relative transition-all active:scale-95 ${
+                isActive ? 'text-cyan-400' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <div className="relative">
-                {item.icon}
+                <span className={isActive ? 'drop-shadow-[0_0_8px_rgba(0,229,255,0.5)]' : ''}>
+                  {item.icon}
+                </span>
                 {item.badge !== undefined && (
-                  <span className="absolute -top-1.5 -right-2 px-1.5 py-0.2 bg-trade-accent text-slate-950 text-[10px] font-black rounded-full font-mono">
+                  <span className="absolute -top-1.5 -right-2.5 px-1.5 py-0.2 bg-gradient-to-r from-cyan-400 to-emerald-400 text-slate-950 text-[10px] font-black rounded-full font-mono shadow-sm">
                     {item.badge}
                   </span>
                 )}
               </div>
-              <span className={`text-[10px] font-semibold mt-1 tracking-tight ${isActive ? 'text-trade-accent' : 'text-slate-400'}`}>
+              <span className={`text-[10px] font-bold mt-1 tracking-tight font-sans ${isActive ? 'text-cyan-300' : 'text-slate-500'}`}>
                 {item.label}
               </span>
               {isActive && (
-                <span className="absolute top-0 w-8 h-0.5 bg-trade-accent rounded-full"></span>
+                <span className="absolute top-0 w-8 h-0.5 bg-gradient-to-r from-cyan-400 to-emerald-400 rounded-full shadow-[0_0_10px_rgba(0,229,255,0.8)]"></span>
               )}
             </button>
           );

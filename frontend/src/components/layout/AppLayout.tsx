@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navbar } from './Navbar';
 import { MobileDock, ActiveTab } from './MobileDock';
-import { LayoutDashboard, TrendingUp, Zap, Clock, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Zap, Clock, ShieldCheck, Radio } from 'lucide-react';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -59,7 +59,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   ];
 
   return (
-    <div className="min-h-screen bg-oled-canvas text-oled-text flex flex-col">
+    <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col relative selection:bg-cyan-500 selection:text-black">
+      {/* Ambient Top Mesh Glow */}
+      <div className="ambient-glow"></div>
+
       {/* Top Navbar */}
       <Navbar
         onRefresh={onRefresh}
@@ -69,41 +72,43 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       />
 
       {/* Main Body */}
-      <div className="flex-1 flex max-w-7xl w-full mx-auto pb-20 md:pb-8">
+      <div className="flex-1 flex max-w-7xl w-full mx-auto pb-24 md:pb-8 relative z-10">
         {/* Desktop Left Sidebar (hidden on mobile) */}
-        <aside className="hidden md:flex flex-col w-64 p-4 border-r border-oled-border shrink-0 gap-6">
+        <aside className="hidden md:flex flex-col w-64 p-4 border-r border-slate-800/80 shrink-0 gap-6">
           {/* Navigation Section */}
-          <div className="space-y-1">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 px-3 mb-2">
-              Navigation
+          <div className="space-y-1.5">
+            <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 px-3 mb-2 flex items-center justify-between">
+              <span>Navigation</span>
+              <span className="text-[10px] text-cyan-400">PWA</span>
             </div>
+
             {navLinks.map((item) => {
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all ${
+                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-left transition-all group ${
                     isActive
-                      ? 'bg-sky-500/10 text-trade-accent border border-sky-500/30 shadow-sm'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900/60'
+                      ? 'bg-gradient-to-r from-cyan-500/15 via-cyan-500/10 to-transparent text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-950/40'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-900/60 border border-transparent'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className={isActive ? 'text-trade-accent' : 'text-slate-400'}>
+                    <span className={`transition-transform group-hover:scale-110 ${isActive ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]' : 'text-slate-400'}`}>
                       {item.icon}
                     </span>
                     <div>
-                      <div className="text-sm font-semibold leading-tight">
+                      <div className="text-xs font-bold leading-tight font-sans">
                         {item.label}
                       </div>
-                      <div className="text-[11px] text-slate-400 leading-tight">
+                      <div className="text-[10px] text-slate-500 leading-tight font-mono mt-0.5">
                         {item.sub}
                       </div>
                     </div>
                   </div>
                   {item.badge !== undefined && (
-                    <span className="font-mono text-xs font-bold px-2 py-0.5 rounded-full bg-trade-accent/20 text-trade-accent">
+                    <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm">
                       {item.badge}
                     </span>
                   )}
@@ -113,18 +118,29 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           </div>
 
           {/* Institutional Status Deck */}
-          <div className="mt-auto p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
-            <div className="text-xs font-bold text-slate-300 flex items-center justify-between">
-              <span>System Status</span>
-              <span className="flex items-center gap-1 text-[10px] text-emerald-400">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <div className="mt-auto p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-2.5 shadow-inner">
+            <div className="text-xs font-bold text-slate-200 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                <span>Quant Engine</span>
+              </span>
+              <span className="font-mono text-[10px] font-bold text-emerald-400 px-1.5 py-0.2 rounded bg-emerald-500/15 border border-emerald-500/30">
                 ACTIVE
               </span>
             </div>
-            <div className="text-[11px] text-slate-400 font-mono">
-              <div>Constituents: 750 (500+250)</div>
-              <div>Database: SQLite WAL</div>
-              <div>Alerts: WhatsApp Cloud</div>
+            <div className="text-[11px] text-slate-400 font-mono space-y-1 pt-1 border-t border-slate-900">
+              <div className="flex justify-between">
+                <span>Universe:</span>
+                <span className="text-slate-300 font-semibold">750 Stocks</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Database:</span>
+                <span className="text-slate-300 font-semibold">SQLite WAL</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Disaster BKP:</span>
+                <span className="text-cyan-400 font-semibold">Parquet Snap</span>
+              </div>
             </div>
           </div>
         </aside>

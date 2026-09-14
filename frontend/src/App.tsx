@@ -15,7 +15,7 @@ import {
   fetchSystemHealth,
   triggerRefresh
 } from './services/api';
-import { AlertCircle, CheckCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('nexus');
@@ -131,14 +131,14 @@ export const App: React.FC = () => {
       {/* Dynamic Toast Feedback */}
       {toastMessage && (
         <div
-          className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-lg border text-xs font-semibold backdrop-blur-md transition-all ${
+          className={`fixed top-4 right-4 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold font-sans backdrop-blur-xl transition-all ${
             toastMessage.type === 'success'
-              ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40 shadow-bull-glow'
-              : 'bg-rose-950/90 text-rose-300 border-rose-500/40 shadow-bear-glow'
+              ? 'bg-slate-950/95 text-emerald-300 border-emerald-500/40 shadow-[0_0_20px_rgba(0,255,157,0.25)]'
+              : 'bg-slate-950/95 text-rose-300 border-rose-500/40 shadow-[0_0_20px_rgba(255,51,102,0.25)]'
           }`}
         >
           {toastMessage.type === 'success' ? (
-            <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           ) : (
             <AlertCircle className="w-4 h-4 text-rose-400" />
           )}

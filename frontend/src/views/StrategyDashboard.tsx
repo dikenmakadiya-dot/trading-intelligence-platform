@@ -45,9 +45,9 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
   }, [initialStrategyId]);
 
   const strategies = [
-    { id: 'rsi_52w_breakout', name: '3-Day RSI Breakout', short: '3D-RSI' },
-    { id: 'clean_candle_5y', name: '5Y Clean Breakout', short: '5Y Clean' },
-    { id: 'gfs_mtf_rsi', name: 'GFS Multi-Timeframe', short: 'GFS MTF' }
+    { id: 'rsi_52w_breakout', name: 'Strategy 1: 3-Day RSI Breakout', short: '3D-RSI' },
+    { id: 'clean_candle_5y', name: 'Strategy 2: 5Y Clean Breakout', short: '5Y Clean' },
+    { id: 'gfs_mtf_rsi', name: 'Strategy 3: GFS Multi-Timeframe', short: 'GFS MTF' }
   ];
 
   const currentStrategyData = backtestData?.strategies?.[activeStrategy];
@@ -96,7 +96,7 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
     const filtered = raw.filter((t) => {
       return (
         t.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (t.company_name && t.company_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (t.exit_reason && t.exit_reason.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     });
@@ -141,17 +141,17 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
       {/* Strategy Switcher Tabs & Backtest Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card p-4 rounded-2xl">
         {/* Strategy Tabs */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-900/80 rounded-xl border border-slate-800">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-950/90 rounded-xl border border-slate-800/90">
           {strategies.map((strat) => {
             const isActive = activeStrategy === strat.id;
             return (
               <button
                 key={strat.id}
                 onClick={() => setActiveStrategy(strat.id)}
-                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all ${
+                className={`px-4 py-2 rounded-xl text-xs font-bold font-sans transition-all ${
                   isActive
-                    ? 'bg-sky-500/20 text-trade-accent border border-sky-500/40 shadow-sm'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                    ? 'bg-gradient-to-r from-cyan-500/20 to-emerald-500/15 text-cyan-300 border border-cyan-500/40 shadow-lg shadow-cyan-950/50'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-900/60 border border-transparent'
                 }`}
               >
                 <span>{strat.name}</span>
@@ -164,19 +164,19 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
         <button
           onClick={() => onRefreshBacktest(activeStrategy)}
           disabled={isRefreshingBacktest}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 border border-sky-500/30 hover:border-sky-400 active:scale-95 transition-all shadow-sm disabled:opacity-50"
+          className="relative group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-sans bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 hover:text-white border border-cyan-500/40 hover:border-cyan-400 active:scale-95 transition-all shadow-sm disabled:opacity-50"
         >
-          <RotateCcw className={`w-3.5 h-3.5 ${isRefreshingBacktest ? 'animate-spin' : ''}`} />
+          <RotateCcw className={`w-3.5 h-3.5 text-cyan-400 group-hover:-rotate-180 transition-transform duration-500 ${isRefreshingBacktest ? 'animate-spin' : ''}`} />
           <span>{isRefreshingBacktest ? 'Simulating Trades...' : 'Refresh Backtest'}</span>
         </button>
       </div>
 
       {/* Pending status banner if strategy backtest data not yet generated */}
       {!hasKpiData && (
-        <div className="flex items-center gap-2 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
-          <Clock className="w-4 h-4 shrink-0" />
+        <div className="flex items-center gap-2.5 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-medium">
+          <Clock className="w-4 h-4 shrink-0 text-amber-400" />
           <span>
-            Backtest simulation KPIs pending for <strong>{strategies.find(s => s.id === activeStrategy)?.name}</strong>. Tap "Refresh Backtest" above to simulate historical executions.
+            Backtest simulation KPIs pending for <strong>{strategies.find(s => s.id === activeStrategy)?.name}</strong>. Click "Refresh Backtest" above to simulate historical executions.
           </span>
         </div>
       )}
@@ -186,13 +186,13 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
         <MetricCard
           label="Initial Capital"
           value={`₹${(initialCapital / 100000).toFixed(2)}L`}
-          subtext="Base Allocation"
+          subtext="Base Portfolio Pool"
           icon={<DollarSign className="w-4 h-4" />}
         />
         <MetricCard
           label="Final Equity"
           value={`₹${(finalEquity / 100000).toFixed(2)}L`}
-          subtext={`Net P&L: ₹${(totalPnl / 100000).toFixed(2)}L`}
+          subtext={`Net Gain: ₹${(totalPnl / 100000).toFixed(2)}L`}
           trend={totalPnl >= 0 ? 'bullish' : 'bearish'}
           icon={<TrendingUp className="w-4 h-4" />}
           highlight
@@ -240,103 +240,111 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
       </div>
 
       {/* Equity Curve & Underwater Drawdown Chart */}
-      <div className="glass-card rounded-2xl p-5 space-y-3">
+      <div className="glass-card rounded-2xl p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-trade-accent" />
-            <h3 className="text-sm font-bold text-white">
-              Historical Equity Growth &amp; Underwater Drawdown
-            </h3>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white font-sans">
+                Historical Compounding Equity Curve &amp; Underwater Drawdown
+              </h3>
+              <p className="text-xs text-slate-400">Audited against actual daily 1D Bhavcopy settlement bars</p>
+            </div>
           </div>
-          <span className="font-mono text-xs text-slate-400 tabular-nums">
+          <span className="font-mono text-xs text-cyan-400 tabular-nums px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800">
             {activeEquityCurve.length} Daily Points
           </span>
         </div>
 
-        <EquityCurveChart data={activeEquityCurve} height={320} />
+        <EquityCurveChart data={activeEquityCurve} height={330} />
       </div>
 
       {/* Audited Historical Trade Log */}
-      <div className="glass-card rounded-2xl p-5 space-y-4">
+      <div className="glass-card rounded-2xl p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-bold text-white">
-              Audited Historical Trade Log
+            <h3 className="text-sm font-bold text-white font-sans flex items-center gap-2">
+              <span>Audited Historical Trade Log</span>
+              <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-slate-800 text-slate-300">
+                {trades.length} Trades
+              </span>
             </h3>
-            <p className="text-xs text-slate-400">
-              Complete trade executions with holding days, exit reason, and 1-tap Groww chart links
+            <p className="text-xs text-slate-400 mt-0.5">
+              Complete historical trade executions with holding days, exit reason, and 1-tap Groww chart links
             </p>
           </div>
 
           {/* Search bar */}
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search symbol, exit reason..."
+              placeholder="Search symbol, reason..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-56 pl-9 pr-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 transition-colors"
+              className="w-56 pl-8 pr-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors font-mono"
             />
           </div>
         </div>
 
         {/* Trade Log Table */}
         {trades.length === 0 ? (
-          <div className="py-12 text-center text-slate-500 text-sm">
+          <div className="py-16 text-center text-slate-500 text-sm font-mono">
             No historical trades match your search.
           </div>
         ) : (
           <div className="space-y-2">
             <div
               ref={tableContainerRef}
-              className="overflow-x-auto overflow-y-auto max-h-[500px] rounded-xl border border-slate-800/80 bg-slate-950/40"
+              className="overflow-x-auto overflow-y-auto max-h-[520px] rounded-xl border border-slate-800/90 bg-slate-950/60"
             >
               <table className="w-full text-left text-xs border-collapse">
-                <thead className="sticky top-0 bg-slate-900/95 backdrop-blur-sm z-10">
-                  <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
-                    <th className="py-2.5 px-3">Symbol</th>
+                <thead className="sticky top-0 bg-slate-900/95 backdrop-blur-md z-10 border-b border-slate-800">
+                  <tr className="text-slate-400 font-mono text-[11px] uppercase tracking-wider">
+                    <th className="py-3 px-4">Symbol</th>
                     <th
-                      className="py-2.5 px-3 cursor-pointer hover:text-white"
+                      className="py-3 px-4 cursor-pointer hover:text-white transition-colors"
                       onClick={() => toggleSort('entry_date')}
                     >
                       <div className="flex items-center gap-1">
                         <span>Entry Date</span>
-                        <ArrowUpDown className="w-3 h-3" />
+                        <ArrowUpDown className="w-3 h-3 text-slate-500" />
                       </div>
                     </th>
-                    <th className="py-2.5 px-3 text-right">Entry Price</th>
+                    <th className="py-3 px-4 text-right">Entry Price</th>
                     <th
-                      className="py-2.5 px-3 cursor-pointer hover:text-white"
+                      className="py-3 px-4 cursor-pointer hover:text-white transition-colors"
                       onClick={() => toggleSort('exit_date')}
                     >
                       <div className="flex items-center gap-1">
                         <span>Exit Date</span>
-                        <ArrowUpDown className="w-3 h-3" />
+                        <ArrowUpDown className="w-3 h-3 text-slate-500" />
                       </div>
                     </th>
-                    <th className="py-2.5 px-3 text-right">Exit Price</th>
+                    <th className="py-3 px-4 text-right">Exit Price</th>
                     <th
-                      className="py-2.5 px-3 text-right cursor-pointer hover:text-white"
+                      className="py-3 px-4 text-right cursor-pointer hover:text-white transition-colors"
                       onClick={() => toggleSort('net_return_pct')}
                     >
                       <div className="flex items-center justify-end gap-1">
                         <span>Return %</span>
-                        <ArrowUpDown className="w-3 h-3" />
+                        <ArrowUpDown className="w-3 h-3 text-slate-500" />
                       </div>
                     </th>
-                    <th className="py-2.5 px-3 text-right">P&amp;L (₹)</th>
+                    <th className="py-3 px-4 text-right">P&amp;L (₹)</th>
                     <th
-                      className="py-2.5 px-3 text-center cursor-pointer hover:text-white"
+                      className="py-3 px-4 text-center cursor-pointer hover:text-white transition-colors"
                       onClick={() => toggleSort('holding_days')}
                     >
                       <div className="flex items-center justify-center gap-1">
                         <span>Hold (d)</span>
-                        <ArrowUpDown className="w-3 h-3" />
+                        <ArrowUpDown className="w-3 h-3 text-slate-500" />
                       </div>
                     </th>
-                    <th className="py-2.5 px-3">Exit Reason</th>
-                    <th className="py-2.5 px-3 text-center">Groww Chart</th>
+                    <th className="py-3 px-4">Exit Reason</th>
+                    <th className="py-3 px-4 text-center">Groww Chart</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 font-mono">
@@ -353,45 +361,45 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
                         key={`${t.symbol}-${t.entry_date}-${virtualRow.index}`}
                         data-index={virtualRow.index}
                         ref={rowVirtualizer.measureElement}
-                        className="hover:bg-slate-900/50 transition-colors"
+                        className="hover:bg-slate-900/60 transition-colors group"
                       >
-                        <td className="py-2.5 px-3 font-sans font-bold text-white">
+                        <td className="py-3 px-4 font-bold text-white font-mono group-hover:text-cyan-400 transition-colors">
                           {t.symbol}
                         </td>
-                        <td className="py-2.5 px-3 text-slate-400 tabular-nums">
+                        <td className="py-3 px-4 text-slate-400 tabular-nums">
                           {t.entry_date}
                         </td>
-                        <td className="py-2.5 px-3 text-right text-slate-200 tabular-nums">
+                        <td className="py-3 px-4 text-right text-slate-200 tabular-nums">
                           ₹{t.entry_price.toFixed(2)}
                         </td>
-                        <td className="py-2.5 px-3 text-slate-400 tabular-nums">
+                        <td className="py-3 px-4 text-slate-400 tabular-nums">
                           {t.exit_date}
                         </td>
-                        <td className="py-2.5 px-3 text-right text-slate-200 tabular-nums">
+                        <td className="py-3 px-4 text-right text-slate-200 tabular-nums">
                           ₹{t.exit_price.toFixed(2)}
                         </td>
-                        <td className={`py-2.5 px-3 text-right font-bold tabular-nums ${
-                          isWin ? 'text-trade-bullish' : 'text-trade-bearish'
+                        <td className={`py-3 px-4 text-right font-bold tabular-nums ${
+                          isWin ? 'text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.3)]' : 'text-rose-400'
                         }`}>
                           {isWin ? '+' : ''}{t.net_return_pct.toFixed(2)}%
                         </td>
-                        <td className={`py-2.5 px-3 text-right font-bold tabular-nums ${
-                          (t.pnl_amount || 0) >= 0 ? 'text-trade-bullish' : 'text-trade-bearish'
+                        <td className={`py-3 px-4 text-right font-bold tabular-nums ${
+                          (t.pnl_amount || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'
                         }`}>
                           {(t.pnl_amount || 0) >= 0 ? '+' : ''}₹{Math.round(t.pnl_amount || 0).toLocaleString('en-IN')}
                         </td>
-                        <td className="py-2.5 px-3 text-center text-slate-400 tabular-nums">
-                          {t.holding_days}
+                        <td className="py-3 px-4 text-center text-slate-400 tabular-nums">
+                          {t.holding_days}d
                         </td>
-                        <td className="py-2.5 px-3 font-sans text-xs">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] ${
-                            isWin ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'
+                        <td className="py-3 px-4 font-sans text-xs">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold ${
+                            isWin ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                           }`}>
-                            {isWin ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                            {isWin ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : <XCircle className="w-3 h-3 text-rose-400" />}
                             {t.exit_reason || (isWin ? 'Target Hit' : 'Stop Loss')}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 text-center">
+                        <td className="py-3 px-4 text-center">
                           <GrowwLink url={t.groww_chart_url} symbol={t.symbol} variant="icon" />
                         </td>
                       </tr>
@@ -406,12 +414,12 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
               </table>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-500 pt-1 px-1">
+            <div className="flex items-center justify-between text-xs text-slate-500 pt-1 px-1 font-mono">
               <span>
-                Showing <strong>{trades.length}</strong> audited trades (virtualized high-performance DOM)
+                Showing <strong className="text-white">{trades.length}</strong> audited trades (virtualized high-performance DOM)
               </span>
-              <span className="font-mono text-[11px] text-slate-400">
-                Smooth 60fps scrolling across complete dataset
+              <span className="text-cyan-400/80">
+                Smooth 60 FPS scrolling across complete dataset
               </span>
             </div>
           </div>
