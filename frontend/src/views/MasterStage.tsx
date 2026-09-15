@@ -70,27 +70,27 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
             </span>
           </div>
 
-          <div className="my-2">
+          <div className="my-1 flex-1 flex items-center justify-center">
             <RadialGauge
               percentage={market_regime?.breadth_pct || 0}
               gateOpen={market_regime?.gate_open || false}
               stocksAbove={market_regime?.stocks_above_ema50 || 0}
               totalStocks={market_regime?.total_stocks_evaluated || 500}
               statusLabel={market_regime?.status_label}
-              size={210}
+              size={195}
             />
           </div>
 
           <div className="pt-2.5 border-t border-slate-800/80 text-[11px] text-center font-medium">
             {market_regime?.gate_open ? (
-              <span className="text-emerald-400 flex items-center justify-center gap-1 font-sans">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Breadth &ge; 50.0% — Fresh breakout orders enabled.
+              <span className="text-emerald-400 inline-flex items-center justify-center gap-1 font-sans">
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                <span>Breadth &ge; 50.0% — Fresh breakout orders enabled.</span>
               </span>
             ) : (
-              <span className="text-rose-400 flex items-center justify-center gap-1 font-sans">
-                <AlertTriangle className="w-3.5 h-3.5" />
-                Defensive cash mode. New purchases throttled.
+              <span className="text-rose-400 inline-flex items-center justify-center gap-1 font-sans">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                <span>Defensive cash mode. New purchases throttled.</span>
               </span>
             )}
           </div>
@@ -190,9 +190,9 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
                   key={`fresh-top-${sig.symbol}-${idx}`}
                   className="p-2.5 rounded-xl bg-slate-950/80 border border-cyan-500/30 hover:border-cyan-400 transition-all space-y-1"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono font-extrabold text-sm text-white">{sig.symbol}</span>
-                    <StrategyBadge strategyId={sig.strategy_id} className="text-[9px] px-1.5 py-0" />
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono font-extrabold text-sm text-white truncate min-w-0">{sig.symbol}</span>
+                    <StrategyBadge strategyId={sig.strategy_id} className="text-[9px] px-1.5 py-0 shrink-0" />
                   </div>
                   <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
                     <span>Trigger: <span className="text-cyan-400 font-bold">₹{(sig.entry_trigger || sig.close || 0).toFixed(1)}</span></span>
@@ -343,16 +343,16 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
           <div className="overflow-x-auto rounded-xl border border-slate-800/90 bg-slate-950/60">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/80 text-slate-400 font-mono text-[11px] uppercase tracking-wider">
-                  <th className="py-3 px-4">#</th>
-                  <th className="py-3 px-4">Symbol &amp; Company</th>
-                  <th className="py-3 px-4">Strategy Engine</th>
-                  <th className="py-3 px-4 text-right">Close LTP</th>
-                  <th className="py-3 px-4 text-right">Trigger Entry</th>
-                  <th className="py-3 px-4 text-right">Stop Loss</th>
-                  <th className="py-3 px-4 text-right">Target</th>
-                  <th className="py-3 px-4 text-center">Indicators</th>
-                  <th className="py-3 px-4 text-center">Groww Chart</th>
+                <tr className="border-b border-slate-800 bg-slate-900/80 text-slate-400 font-mono text-[11px] uppercase tracking-wider whitespace-nowrap">
+                  <th className="py-3 px-3 w-10 text-center">#</th>
+                  <th className="py-3 px-4 min-w-[200px]">Symbol &amp; Company</th>
+                  <th className="py-3 px-4 min-w-[140px]">Strategy Engine</th>
+                  <th className="py-3 px-4 text-right min-w-[90px]">Close LTP</th>
+                  <th className="py-3 px-4 text-right min-w-[100px]">Trigger Entry</th>
+                  <th className="py-3 px-4 text-right min-w-[90px]">Stop Loss</th>
+                  <th className="py-3 px-4 text-right min-w-[90px]">Target</th>
+                  <th className="py-3 px-4 text-center min-w-[130px]">Indicators</th>
+                  <th className="py-3 px-4 text-center min-w-[120px]">Groww Chart</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-mono">
@@ -361,37 +361,37 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
                     key={`${sig.strategy_id}-${sig.symbol}-${idx}`}
                     className="hover:bg-slate-900/60 transition-colors group"
                   >
-                    <td className="py-3.5 px-4 text-slate-500 tabular-nums">
+                    <td className="py-3.5 px-3 text-center text-slate-500 tabular-nums">
                       {idx + 1}
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center text-cyan-300 font-bold text-xs shrink-0">
                           {sig.symbol.slice(0, 2)}
                         </div>
                         <div>
                           <div className="font-bold text-white text-sm group-hover:text-cyan-400 transition-colors flex items-center gap-1.5 font-mono">
-                            {sig.symbol}
+                            <span>{sig.symbol}</span>
                             <span className="text-[10px] font-sans font-medium text-slate-400 px-1.5 py-0.2 rounded bg-slate-900 border border-slate-800">
                               {sig.industry || 'NSE'}
                             </span>
                           </div>
-                          <div className="text-[11px] text-slate-400 font-sans truncate max-w-[200px]">
+                          <div className="text-[11px] text-slate-400 font-sans truncate max-w-[180px]">
                             {sig.company_name}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 font-sans">
+                    <td className="py-3.5 px-4 font-sans whitespace-nowrap">
                       <StrategyBadge strategyId={sig.strategy_id} name={sig.strategy_name} />
                     </td>
-                    <td className="py-3.5 px-4 text-right font-bold text-white text-sm tabular-nums">
+                    <td className="py-3.5 px-4 text-right font-bold text-white text-sm tabular-nums whitespace-nowrap">
                       ₹{(sig.close || sig.close_price || 0).toFixed(2)}
                     </td>
-                    <td className="py-3.5 px-4 text-right text-cyan-400 font-extrabold text-sm tabular-nums">
+                    <td className="py-3.5 px-4 text-right text-cyan-400 font-extrabold text-sm tabular-nums whitespace-nowrap">
                       ₹{(sig.entry_trigger ?? sig.close ?? 0).toFixed(2)}
                     </td>
-                    <td className="py-3.5 px-4 text-right text-rose-400 tabular-nums font-bold">
+                    <td className="py-3.5 px-4 text-right text-rose-400 tabular-nums font-bold whitespace-nowrap">
                       ₹{(sig.trailing_sl ?? 0).toFixed(2)}
                       {sig.entry_trigger && sig.trailing_sl ? (
                         <div className="text-[10px] text-slate-500">
@@ -399,7 +399,7 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
                         </div>
                       ) : null}
                     </td>
-                    <td className="py-3.5 px-4 text-right text-emerald-400 tabular-nums font-bold">
+                    <td className="py-3.5 px-4 text-right text-emerald-400 tabular-nums font-bold whitespace-nowrap">
                       {sig.target_price ? `₹${Number(sig.target_price).toFixed(2)}` : 'Trailing'}
                       {sig.target_price && sig.entry_trigger ? (
                         <div className="text-[10px] text-emerald-500">
@@ -407,7 +407,7 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
                         </div>
                       ) : null}
                     </td>
-                    <td className="py-3.5 px-4 text-center font-sans">
+                    <td className="py-3.5 px-4 text-center font-sans whitespace-nowrap">
                       <div className="flex items-center justify-center gap-1.5 text-[11px]">
                         {sig.daily_rsi ? (
                           <span className="px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 font-mono text-[10px] text-white">
@@ -421,7 +421,7 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
                         ) : null}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-center">
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
                       <GrowwLink
                         url={sig.groww_chart_url}
                         symbol={sig.symbol}

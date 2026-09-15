@@ -302,49 +302,49 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
             >
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="sticky top-0 bg-slate-900/95 backdrop-blur-md z-10 border-b border-slate-800">
-                  <tr className="text-slate-400 font-mono text-[11px] uppercase tracking-wider">
-                    <th className="py-3 px-4">Symbol</th>
+                  <tr className="text-slate-400 font-mono text-[11px] uppercase tracking-wider whitespace-nowrap">
+                    <th className="py-3 px-4 min-w-[90px]">Symbol</th>
                     <th
-                      className="py-3 px-4 cursor-pointer hover:text-white transition-colors"
+                      className="py-3 px-4 cursor-pointer hover:text-white transition-colors min-w-[120px]"
                       onClick={() => toggleSort('entry_date')}
                     >
-                      <div className="flex items-center gap-1">
+                      <div className="inline-flex items-center gap-1.5">
                         <span>Entry Date</span>
-                        <ArrowUpDown className="w-3 h-3 text-slate-500" />
+                        <ArrowUpDown className="w-3 h-3 text-slate-500 shrink-0" />
                       </div>
                     </th>
-                    <th className="py-3 px-4 text-right">Entry Price</th>
+                    <th className="py-3 px-4 text-right min-w-[100px]">Entry Price</th>
                     <th
-                      className="py-3 px-4 cursor-pointer hover:text-white transition-colors"
+                      className="py-3 px-4 cursor-pointer hover:text-white transition-colors min-w-[120px]"
                       onClick={() => toggleSort('exit_date')}
                     >
-                      <div className="flex items-center gap-1">
+                      <div className="inline-flex items-center gap-1.5">
                         <span>Exit Date</span>
-                        <ArrowUpDown className="w-3 h-3 text-slate-500" />
+                        <ArrowUpDown className="w-3 h-3 text-slate-500 shrink-0" />
                       </div>
                     </th>
-                    <th className="py-3 px-4 text-right">Exit Price</th>
+                    <th className="py-3 px-4 text-right min-w-[100px]">Exit Price</th>
                     <th
-                      className="py-3 px-4 text-right cursor-pointer hover:text-white transition-colors"
+                      className="py-3 px-4 text-right cursor-pointer hover:text-white transition-colors min-w-[110px]"
                       onClick={() => toggleSort('net_return_pct')}
                     >
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="inline-flex items-center justify-end gap-1.5">
                         <span>Return %</span>
-                        <ArrowUpDown className="w-3 h-3 text-slate-500" />
+                        <ArrowUpDown className="w-3 h-3 text-slate-500 shrink-0" />
                       </div>
                     </th>
-                    <th className="py-3 px-4 text-right">P&amp;L (₹)</th>
+                    <th className="py-3 px-4 text-right min-w-[120px]">P&amp;L (₹)</th>
                     <th
-                      className="py-3 px-4 text-center cursor-pointer hover:text-white transition-colors"
+                      className="py-3 px-4 text-center cursor-pointer hover:text-white transition-colors min-w-[95px]"
                       onClick={() => toggleSort('holding_days')}
                     >
-                      <div className="flex items-center justify-center gap-1">
+                      <div className="inline-flex items-center justify-center gap-1.5">
                         <span>Hold (d)</span>
-                        <ArrowUpDown className="w-3 h-3 text-slate-500" />
+                        <ArrowUpDown className="w-3 h-3 text-slate-500 shrink-0" />
                       </div>
                     </th>
-                    <th className="py-3 px-4">Exit Reason</th>
-                    <th className="py-3 px-4 text-center">Groww Chart</th>
+                    <th className="py-3 px-4 min-w-[120px]">Exit Reason</th>
+                    <th className="py-3 px-4 text-center min-w-[90px] w-24">Groww Chart</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 font-mono">
@@ -363,43 +363,43 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
                         ref={rowVirtualizer.measureElement}
                         className="hover:bg-slate-900/60 transition-colors group"
                       >
-                        <td className="py-3 px-4 font-bold text-white font-mono group-hover:text-cyan-400 transition-colors">
+                        <td className="py-3 px-4 font-bold text-white font-mono group-hover:text-cyan-400 transition-colors whitespace-nowrap">
                           {t.symbol}
                         </td>
-                        <td className="py-3 px-4 text-slate-400 tabular-nums">
+                        <td className="py-3 px-4 text-slate-400 tabular-nums whitespace-nowrap">
                           {t.entry_date}
                         </td>
-                        <td className="py-3 px-4 text-right text-slate-200 tabular-nums">
+                        <td className="py-3 px-4 text-right text-slate-200 tabular-nums whitespace-nowrap">
                           ₹{t.entry_price.toFixed(2)}
                         </td>
-                        <td className="py-3 px-4 text-slate-400 tabular-nums">
+                        <td className="py-3 px-4 text-slate-400 tabular-nums whitespace-nowrap">
                           {t.exit_date}
                         </td>
-                        <td className="py-3 px-4 text-right text-slate-200 tabular-nums">
+                        <td className="py-3 px-4 text-right text-slate-200 tabular-nums whitespace-nowrap">
                           ₹{t.exit_price.toFixed(2)}
                         </td>
-                        <td className={`py-3 px-4 text-right font-bold tabular-nums ${
+                        <td className={`py-3 px-4 text-right font-bold tabular-nums whitespace-nowrap ${
                           isWin ? 'text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.3)]' : 'text-rose-400'
                         }`}>
                           {isWin ? '+' : ''}{t.net_return_pct.toFixed(2)}%
                         </td>
-                        <td className={`py-3 px-4 text-right font-bold tabular-nums ${
+                        <td className={`py-3 px-4 text-right font-bold tabular-nums whitespace-nowrap ${
                           (t.pnl_amount || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'
                         }`}>
                           {(t.pnl_amount || 0) >= 0 ? '+' : ''}₹{Math.round(t.pnl_amount || 0).toLocaleString('en-IN')}
                         </td>
-                        <td className="py-3 px-4 text-center text-slate-400 tabular-nums">
+                        <td className="py-3 px-4 text-center text-slate-400 tabular-nums whitespace-nowrap">
                           {t.holding_days}d
                         </td>
-                        <td className="py-3 px-4 font-sans text-xs">
+                        <td className="py-3 px-4 font-sans text-xs whitespace-nowrap">
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold ${
                             isWin ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                           }`}>
-                            {isWin ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : <XCircle className="w-3 h-3 text-rose-400" />}
-                            {t.exit_reason || (isWin ? 'Target Hit' : 'Stop Loss')}
+                            {isWin ? <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" /> : <XCircle className="w-3 h-3 text-rose-400 shrink-0" />}
+                            <span>{t.exit_reason || (isWin ? 'Target Hit' : 'Stop Loss')}</span>
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-center">
+                        <td className="py-3 px-4 text-center whitespace-nowrap">
                           <GrowwLink url={t.groww_chart_url} symbol={t.symbol} variant="icon" />
                         </td>
                       </tr>

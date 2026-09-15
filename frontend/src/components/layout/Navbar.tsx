@@ -38,13 +38,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 INSTITUTIONAL
               </span>
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
-              <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium whitespace-nowrap">
+              <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
                 <span>CLOUD SYNC</span>
               </span>
               <span className="text-slate-600">•</span>
-              <span className={`font-semibold ${gateOpen ? 'text-emerald-400' : 'text-rose-400'}`}>
+              <span className={`inline-flex items-center font-semibold ${gateOpen ? 'text-emerald-400' : 'text-rose-400'}`}>
                 {gateOpen ? 'GATE: OPEN' : 'DEFENSIVE: CASH'}
               </span>
               <span className="text-slate-600">•</span>
@@ -54,21 +54,21 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* System Intelligence Pulse Bar (Desktop) */}
-        <div className="hidden lg:flex items-center gap-3 bg-slate-900/80 px-4 py-2 rounded-2xl border border-slate-800/90 shadow-inner">
+        <div className="hidden lg:flex items-center gap-3 bg-slate-900/80 px-4 py-2 rounded-2xl border border-slate-800/90 shadow-inner shrink-0">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
+            <span className="relative flex h-2.5 w-2.5 shrink-0">
               <span className="beacon-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
-            <span className="text-xs font-bold text-slate-200">ORCHESTRATOR ACTIVE</span>
+            <span className="text-xs font-bold text-slate-200 whitespace-nowrap">ORCHESTRATOR ACTIVE</span>
           </div>
           <span className="text-slate-700">|</span>
-          <div className="text-xs text-slate-400 font-mono">
+          <div className="text-xs text-slate-400 font-mono whitespace-nowrap">
             SYNC: <span className="text-slate-200 font-semibold">{lastSyncTime || '11-Sep-2026 16:15 IST'}</span>
           </div>
           <span className="text-slate-700">|</span>
-          <div className={`text-xs font-bold flex items-center gap-1 ${gateOpen ? 'text-emerald-400' : 'text-rose-400'}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${gateOpen ? 'bg-emerald-400' : 'bg-rose-400'}`}></span>
+          <div className={`text-xs font-bold inline-flex items-center gap-1.5 whitespace-nowrap ${gateOpen ? 'text-emerald-400' : 'text-rose-400'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${gateOpen ? 'bg-emerald-400' : 'bg-rose-400'}`}></span>
             <span>{gateOpen ? 'BULLISH GATE' : 'CAPITAL PRESERVATION'}</span>
           </div>
         </div>

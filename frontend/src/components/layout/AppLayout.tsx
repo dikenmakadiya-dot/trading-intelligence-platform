@@ -79,7 +79,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <div className="space-y-1.5">
             <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 px-3 mb-2 flex items-center justify-between">
               <span>Navigation</span>
-              <span className="text-[10px] text-cyan-400">PWA</span>
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">PWA</span>
             </div>
 
             {navLinks.map((item) => {

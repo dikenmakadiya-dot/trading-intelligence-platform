@@ -151,10 +151,10 @@ export const SystemHealth: React.FC<SystemHealthProps> = ({ healthData, onRefres
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 font-mono">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 font-mono">
           {Object.entries(database?.tables || {}).map(([table, count]) => (
-            <div key={table} className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800">
-              <div className="text-[11px] text-slate-400 truncate" title={table}>
+            <div key={table} className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition-colors">
+              <div className="text-xs font-semibold text-slate-300 truncate" title={table}>
                 {table}
               </div>
               <div className="text-lg font-extrabold text-white tabular-nums mt-1">
@@ -169,7 +169,7 @@ export const SystemHealth: React.FC<SystemHealthProps> = ({ healthData, onRefres
       <div className="glass-card rounded-2xl p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
             <div>
               <h3 className="text-sm font-bold text-white font-sans">
                 Automated Disaster Recovery Snapshots
@@ -179,7 +179,7 @@ export const SystemHealth: React.FC<SystemHealthProps> = ({ healthData, onRefres
               </p>
             </div>
           </div>
-          <span className="font-mono text-xs text-cyan-400 tabular-nums px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800">
+          <span className="font-mono text-xs text-cyan-400 tabular-nums px-2.5 py-0.5 rounded-full bg-slate-900 border border-slate-800 shrink-0">
             {backups?.total_snapshots || 0} Snapshots
           </span>
         </div>
@@ -192,39 +192,39 @@ export const SystemHealth: React.FC<SystemHealthProps> = ({ healthData, onRefres
           <div className="overflow-x-auto rounded-xl border border-slate-800/90 bg-slate-950/60">
             <table className="w-full text-left text-xs border-collapse font-mono">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/80 text-slate-400 text-[11px] uppercase tracking-wider">
-                  <th className="py-3 px-4">Snapshot Identifier</th>
-                  <th className="py-3 px-4">Timestamp (IST)</th>
-                  <th className="py-3 px-4">Integrity</th>
-                  <th className="py-3 px-4">Tables Included</th>
-                  <th className="py-3 px-4 text-right">Download Archive</th>
+                <tr className="border-b border-slate-800 bg-slate-900/80 text-slate-400 text-[11px] uppercase tracking-wider whitespace-nowrap">
+                  <th className="py-3 px-4 min-w-[180px]">Snapshot Identifier</th>
+                  <th className="py-3 px-4 min-w-[140px]">Timestamp (IST)</th>
+                  <th className="py-3 px-4 min-w-[110px]">Integrity</th>
+                  <th className="py-3 px-4 min-w-[120px]">Tables Included</th>
+                  <th className="py-3 px-4 text-right min-w-[120px]">Download Archive</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60">
                 {backups.snapshots_list.map((snap) => (
                   <tr key={snap.snapshot_id} className="hover:bg-slate-900/60 transition-colors">
-                    <td className="py-3 px-4 font-bold text-white">
+                    <td className="py-3 px-4 font-bold text-white whitespace-nowrap">
                       {snap.snapshot_id}
                     </td>
-                    <td className="py-3 px-4 text-slate-400 tabular-nums">
+                    <td className="py-3 px-4 text-slate-400 tabular-nums whitespace-nowrap">
                       {snap.created_at_ist || snap.created_at || 'Recent'}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-4 whitespace-nowrap">
                       <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-bold">
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        SHA-256 OK
+                        <CheckCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>SHA-256 OK</span>
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-slate-400">
+                    <td className="py-3 px-4 text-slate-400 whitespace-nowrap">
                       {snap.table_counts ? Object.keys(snap.table_counts).length : 5} tables
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
                       <button
                         onClick={() => handleDownloadBackup(snap.snapshot_id, 'db')}
                         disabled={downloadingId === snap.snapshot_id}
                         className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold font-sans bg-slate-900 hover:bg-cyan-500/20 text-slate-200 hover:text-cyan-300 border border-slate-700/80 hover:border-cyan-500/40 transition-all active:scale-95 disabled:opacity-50"
                       >
-                        <Download className="w-3.5 h-3.5 text-cyan-400" />
+                        <Download className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
                         <span>{downloadingId === snap.snapshot_id ? 'Downloading...' : 'Export DB'}</span>
                       </button>
                     </td>

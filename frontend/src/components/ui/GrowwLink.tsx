@@ -44,11 +44,11 @@ export const GrowwLink: React.FC<GrowwLinkProps> = ({
         target="_blank"
         rel="noopener noreferrer"
         title={`Open ${symbol || 'stock'} on Groww Chart`}
-        className={`inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:underline transition-colors ${className}`}
+        className={`inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 hover:underline transition-colors whitespace-nowrap shrink-0 ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         <span>Groww</span>
-        <ArrowUpRight className="w-3.5 h-3.5" />
+        <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
       </a>
     );
   }
@@ -58,11 +58,11 @@ export const GrowwLink: React.FC<GrowwLinkProps> = ({
       href={effectiveUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold font-sans bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 hover:text-white border border-emerald-500/30 hover:border-emerald-400 shadow-sm hover:shadow-[0_0_15px_rgba(0,255,157,0.2)] transition-all active:scale-95 ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold font-sans bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 hover:text-white border border-emerald-500/30 hover:border-emerald-400 shadow-sm hover:shadow-[0_0_15px_rgba(0,255,157,0.2)] transition-all active:scale-95 whitespace-nowrap shrink-0 ${className}`}
       onClick={(e) => e.stopPropagation()}
     >
       <span>Groww Chart</span>
-      <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />
+      <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
     </a>
   );
 };
