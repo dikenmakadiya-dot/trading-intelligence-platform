@@ -1,21 +1,18 @@
-name: Daily Multi-Strategy Screener
+name: Manual Strategy Backtest Simulation
 
 on:
-  schedule:
-    # Runs Monday through Friday at 10:45 UTC (4:15 PM IST - immediately following NSE market close)
-    - cron: '45 10 * * 1-5'
   workflow_dispatch:
     inputs:
-      target_date:
-        description: 'Target Scan Date (YYYY-MM-DD)'
+      strategy_id:
+        description: 'Strategy to Backtest (rsi_52w_breakout, clean_candle_5y, gfs_mtf_rsi, or all)'
         required: false
-        default: ''
+        default: 'all'
 
 permissions:
   contents: write
 
 jobs:
-  run-screener-and-deploy:
+  run-manual-backtest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -42,29 +39,20 @@ jobs:
           restore-keys: |
             trading-db-
 
-      - name: Stage 1 - Refresh Base Historical Technical Data
+      - name: Execute On-Demand Multi-Year Backtest Simulation
         run: |
-          echo "[CRON] Stage 1: Updating 5Y NIFTY 750 Base Historical Technical Data..."
-          python src/data_pipeline/update_daily_nifty750.py || echo "[WARN] Base data update step continued."
+          echo "[MANUAL BACKTEST] Running strategy backtest simulation on-demand..."
+          python src/orchestrator.py --mode backtest
 
-      - name: Stage 2 - Execute Multi-Strategy Live Screeners
-        run: |
-          echo "[CRON] Stage 2: Running Live Breakout Screeners across Strategies 1, 2, and 3..."
-          if [ -n "${{ github.event.inputs.target_date }}" ]; then
-            python src/orchestrator.py --mode screener --date "${{ github.event.inputs.target_date }}"
-          else
-            python src/orchestrator.py --mode screener
-          fi
-
-      - name: Upload Daily Signals Artifacts (Archive)
+      - name: Upload Backtest Audit Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: daily-signals-and-db-backup
+          name: manual-backtest-audit-results
           path: |
-            output/consolidated_signals.json
-            output/backups/
+            output/strategy_summary.json
+            output/backtest_results/
             data/trading_platform.db
-          retention-days: 30
+          retention-days: 60
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -77,7 +65,7 @@ jobs:
         working-directory: frontend
         run: npm ci || npm install
 
-      - name: Sync Newly Generated Signals to Frontend
+      - name: Sync Verified Backtest Data to Frontend
         run: |
           mkdir -p frontend/public/data
           cp -f output/consolidated_signals.json frontend/public/data/ 2>/dev/null || true
@@ -87,9 +75,8 @@ jobs:
         working-directory: frontend
         run: npx tsc && npx vite build
 
-      - name: Deploy Live Signals & PWA to GitHub Pages
+      - name: Deploy Updated Backtest & PWA to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./frontend/dist
-

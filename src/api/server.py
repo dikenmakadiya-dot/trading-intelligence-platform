@@ -11,7 +11,7 @@ import datetime
 from pathlib import Path
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 # Add project root to sys.path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -352,6 +352,54 @@ class QuantFlowRequestHandler(SimpleHTTPRequestHandler):
             self.wfile.write(content)
         except Exception as e:
             self._send_json({"error": f"Error reading file: {str(e)}"}, 500)
+
+    def handle_post_refresh(self, payload: Dict[str, Any]):
+        """Executes on-demand screener or backtest refresh."""
+        mode = payload.get("mode", "screener")
+        target_date = payload.get("date")
+
+        try:
+            if mode == "screener":
+                res = run_all_screeners(target_date=target_date)
+                self._sync_output_to_frontend()
+                self._send_json({
+                    "success": True,
+                    "mode": mode,
+                    "triggers": res.get("total_triggers", 0),
+                    "as_of_date": res.get("as_of_date", ""),
+                    "message": f"Daily screener completed with {res.get('total_triggers', 0)} triggers."
+                })
+            elif mode == "backtest":
+                res = run_all_backtests()
+                self._sync_output_to_frontend()
+                self._send_json({
+                    "success": True,
+                    "mode": mode,
+                    "summaries": res,
+                    "message": "Backtest simulation completed across all registered strategies."
+                })
+            else:
+                self._send_json({"success": False, "error": f"Unknown refresh mode: {mode}"}, 400)
+        except Exception as e:
+            self._send_json({"success": False, "error": f"Refresh failed: {str(e)}"}, 500)
+
+    def _sync_output_to_frontend(self):
+        """Copies newly generated signals and backtest data into frontend public and dist directories."""
+        import shutil
+        data_dirs = [
+            PROJECT_ROOT / "frontend" / "public" / "data",
+            PROJECT_ROOT / "frontend" / "dist" / "data"
+        ]
+        for d in data_dirs:
+            try:
+                d.mkdir(parents=True, exist_ok=True)
+                if CONSOLIDATED_SIGNALS_JSON.exists():
+                    shutil.copy2(str(CONSOLIDATED_SIGNALS_JSON), str(d / "consolidated_signals.json"))
+                verified_file = PROJECT_ROOT / "data" / "verified_backtest_data.json"
+                if verified_file.exists():
+                    shutil.copy2(str(verified_file), str(d / "verified_backtest_data.json"))
+            except Exception as ex:
+                print(f"[API SERVER WARNING] Failed to sync data to {d}: {ex}")
 
     # -------------------------------------------------------------------------
     # SPA Static File Serving

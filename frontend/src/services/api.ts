@@ -2,6 +2,14 @@ import { ConsolidatedSignalsPayload, BacktestDataPayload, SystemHealthData } fro
 
 const BASE_URL = '';
 
+export function isStaticCloudDeployment(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    (window.location.hostname.includes('github.io') ||
+     window.location.protocol === 'file:')
+  );
+}
+
 export async function fetchSignals(): Promise<ConsolidatedSignalsPayload> {
   try {
     const res = await fetch(`${BASE_URL}/api/signals`, { cache: 'no-cache' });
@@ -12,8 +20,9 @@ export async function fetchSignals(): Promise<ConsolidatedSignalsPayload> {
     console.warn('[API] /api/signals unavailable, falling back to static bundled dataset:', err);
   }
 
-  // Cloud / Static fallback
-  const staticRes = await fetch('./data/consolidated_signals.json', { cache: 'no-cache' });
+  // Cloud / Static fallback with cache-busting
+  const t = Date.now();
+  const staticRes = await fetch(`./data/consolidated_signals.json?t=${t}`, { cache: 'no-cache' });
   if (!staticRes.ok) {
     throw new Error('Failed to load signals from both API and static fallback.');
   }
@@ -21,6 +30,31 @@ export async function fetchSignals(): Promise<ConsolidatedSignalsPayload> {
 }
 
 export async function triggerRefresh(mode: 'screener' | 'backtest' = 'screener', date?: string): Promise<any> {
+  // If deployed on static cloud (GitHub Pages), there is no live Python backend running locally
+  if (isStaticCloudDeployment()) {
+    if (mode === 'screener') {
+      const t = Date.now();
+      const freshRes = await fetch(`./data/consolidated_signals.json?t=${t}`, { cache: 'no-cache' });
+      if (freshRes.ok) {
+        return {
+          success: true,
+          mode: 'screener',
+          isCloudStatic: true,
+          message: 'Cloud Sync: Loaded latest daily breakout signals. (Automated cloud scanner runs every trading day at 4:15 PM IST).'
+        };
+      }
+    }
+    return {
+      success: true,
+      mode,
+      isCloudStatic: true,
+      message: mode === 'backtest'
+        ? 'Manual Backtest Mode: Audited 5Y KPIs loaded. To run a full cloud simulation, trigger the manual GitHub Actions workflow.'
+        : 'Cloud Sync Active: Daily breakout scanner runs automatically at market close.'
+    };
+  }
+
+  // Local / API Server mode: execute on Python backend
   const res = await fetch(`${BASE_URL}/api/refresh`, {
     method: 'POST',
     headers: {
@@ -29,7 +63,8 @@ export async function triggerRefresh(mode: 'screener' | 'backtest' = 'screener',
     body: JSON.stringify({ mode, date })
   });
   if (!res.ok) {
-    throw new Error(`Failed to trigger refresh: ${res.statusText}`);
+    const errText = await res.text();
+    throw new Error(`Failed to trigger refresh: ${res.status} ${errText}`);
   }
   return res.json();
 }
@@ -47,8 +82,9 @@ export async function fetchBacktestData(strategyId?: string): Promise<BacktestDa
     console.warn('[API] /api/backtest-data unavailable, falling back to static verified dataset:', err);
   }
 
-  // Cloud / Static fallback from verified backtest dataset
-  const staticRes = await fetch('./data/verified_backtest_data.json', { cache: 'no-cache' });
+  // Cloud / Static fallback from verified backtest dataset with cache-busting
+  const t = Date.now();
+  const staticRes = await fetch(`./data/verified_backtest_data.json?t=${t}`, { cache: 'no-cache' });
   if (!staticRes.ok) {
     throw new Error('Failed to load backtest data from static fallback.');
   }

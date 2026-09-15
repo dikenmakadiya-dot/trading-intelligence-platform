@@ -64,13 +64,13 @@ export const App: React.FC = () => {
     try {
       const res = await triggerRefresh('screener');
       if (res.success) {
-        showToast('Daily breakout signals refreshed successfully!', 'success');
+        showToast(res.message || 'Daily breakout signals refreshed successfully!', 'success');
         await loadData();
       } else {
         showToast(`Refresh failed: ${res.error || 'Unknown error'}`, 'error');
       }
     } catch (err: any) {
-      showToast(`Network error triggering screener: ${err.message}`, 'error');
+      showToast(`Refresh error: ${err.message}`, 'error');
     } finally {
       setIsRefreshing(false);
     }
@@ -82,14 +82,14 @@ export const App: React.FC = () => {
     try {
       const res = await triggerRefresh('backtest');
       if (res.success) {
-        showToast(`Backtest re-simulation complete for ${strategyId}`, 'success');
+        showToast(res.message || `Backtest simulation complete for ${strategyId}`, 'success');
         const updatedBt = await fetchBacktestData(strategyId);
         setBacktestData(updatedBt);
       } else {
         showToast(`Backtest failed: ${res.error || 'Unknown error'}`, 'error');
       }
     } catch (err: any) {
-      showToast(`Network error refreshing backtest: ${err.message}`, 'error');
+      showToast(`Backtest error: ${err.message}`, 'error');
     } finally {
       setIsRefreshingBacktest(false);
     }
