@@ -69,6 +69,9 @@ class QuantFlowRequestHandler(SimpleHTTPRequestHandler):
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
         self._set_cors_headers()
         self.end_headers()
         self.wfile.write(body)
@@ -196,6 +199,14 @@ class QuantFlowRequestHandler(SimpleHTTPRequestHandler):
                 except Exception as e:
                     print(f"[SYNC WARNING] Failed copying backtest to {d}: {e}")
 
+        health_file = OUTPUT_DIR / "system_health.json"
+        if health_file.exists():
+            for d in [dist_data, public_data]:
+                try:
+                    shutil.copy2(health_file, d / "system_health.json")
+                except Exception as e:
+                    print(f"[SYNC WARNING] Failed copying system health to {d}: {e}")
+
     def handle_post_refresh(self, payload: Dict[str, Any]):
         """Executes screener or backtest refresh on demand."""
         mode = payload.get("mode", "screener")
@@ -303,6 +314,16 @@ class QuantFlowRequestHandler(SimpleHTTPRequestHandler):
                     "snapshots_list": snapshots[:10]
                 }
             }
+
+            # Save static JSON snapshot for cloud deployment and frontend sync
+            try:
+                OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+                with open(OUTPUT_DIR / "system_health.json", "w", encoding="utf-8") as f:
+                    json.dump(health_data, f, indent=2, default=str)
+                self._sync_output_to_frontend()
+            except Exception as se:
+                print(f"[HEALTH SYNC WARNING] {se}")
+
             self._send_json(health_data)
         except Exception as e:
             self._send_json({"error": f"Failed to retrieve health status: {str(e)}"}, 500)

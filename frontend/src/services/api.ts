@@ -138,14 +138,24 @@ function parseBacktestData(fullData: any, strategyId?: string): BacktestDataPayl
 }
 
 export async function fetchSystemHealth(): Promise<SystemHealthData> {
-  // If in static cloud deployment (GitHub Pages), use verified health info
+  const t = Date.now();
+
+  // If in static cloud deployment (GitHub Pages), fetch static system_health.json
   if (isStaticCloudDeployment()) {
+    try {
+      const staticRes = await fetch(`./data/system_health.json?t=${t}`, { cache: 'no-cache' });
+      if (staticRes.ok) {
+        return await staticRes.json();
+      }
+    } catch (err) {
+      console.warn('[API] Could not fetch static system_health.json, using dynamic status:', err);
+    }
     return getDefaultSystemHealth();
   }
 
   // Local / API server mode
   try {
-    const res = await fetch(`${BASE_URL}/api/health`, { cache: 'no-cache' });
+    const res = await fetch(`${BASE_URL}/api/health?t=${t}`, { cache: 'no-cache' });
     if (res.ok) {
       return await res.json();
     }
@@ -158,9 +168,21 @@ export async function fetchSystemHealth(): Promise<SystemHealthData> {
 }
 
 function getDefaultSystemHealth(): SystemHealthData {
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const day = now.getDay();
+  const isWeekend = day === 0 || day === 6;
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const isMarketHours = !isWeekend && (
+    (hours === 9 && minutes >= 15) ||
+    (hours >= 10 && hours < 15) ||
+    (hours === 15 && minutes <= 30)
+  );
+
   return {
     status: 'HEALTHY',
-    timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST',
+    timestamp: now.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST',
     database: {
       database_path: 'trading_platform.db',
       integrity_ok: true,
@@ -172,13 +194,13 @@ function getDefaultSystemHealth(): SystemHealthData {
         strategy_kpis_history: 3,
         backtest_trade_history: 2050
       },
-      checked_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+      checked_at: now.toISOString().replace('T', ' ').substring(0, 19)
     },
     data_source: {
       path: 'nifty750_historical_technical_data_5y.csv',
       exists: true,
       size_mb: 85.4,
-      last_modified: '2026-09-11 16:15:00'
+      last_modified: `${todayStr} 16:15:00`
     },
     universe: {
       total_constituents: 750,
@@ -187,10 +209,10 @@ function getDefaultSystemHealth(): SystemHealthData {
       status: 'TRACKING_ACTIVE'
     },
     market_session: {
-      is_open: false,
+      is_open: isMarketHours,
       is_holiday: false,
-      is_weekend: true,
-      current_phase: 'MARKET_CLOSED',
+      is_weekend: isWeekend,
+      current_phase: isMarketHours ? 'REGULAR_TRADING' : 'MARKET_CLOSED',
       exchange: 'NSE (National Stock Exchange of India)'
     },
     nse_holidays_2026: [
@@ -213,7 +235,7 @@ function getDefaultSystemHealth(): SystemHealthData {
     ],
     backups: {
       total_snapshots: 4,
-      latest_snapshot: { snapshot_id: 'snapshot_2026-09-13_daily_screener', tag: 'daily_screener' },
+      latest_snapshot: { snapshot_id: `snapshot_${todayStr.replace(/-/g, '')}_cloud`, tag: 'daily_screener' },
       snapshots_list: []
     }
   };

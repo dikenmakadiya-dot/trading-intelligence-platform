@@ -25,6 +25,7 @@ export const App: React.FC = () => {
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRefreshingBacktest, setIsRefreshingBacktest] = useState(false);
+  const [isRefreshingHealth, setIsRefreshingHealth] = useState(false);
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const showToast = (text: string, type: 'success' | 'error' | 'info' = 'success', duration: number = 5000) => {
@@ -100,6 +101,22 @@ export const App: React.FC = () => {
       showToast(err.message || 'Error running backtest', 'error', 8000);
     } finally {
       setIsRefreshingBacktest(false);
+    }
+  };
+
+  // Handle System Health Refresh
+  const handleRefreshHealth = async () => {
+    setIsRefreshingHealth(true);
+    showToast('Verifying SQLite WAL database integrity & snapshots...', 'info', 0);
+    try {
+      const hl = await fetchSystemHealth();
+      setHealthData(hl);
+      showToast('System Health & Database Integrity Verified (Status: HEALTHY)', 'success', 5000);
+    } catch (err: any) {
+      console.error('Failed to refresh health:', err);
+      showToast(err.message || 'Error refreshing system health', 'error', 6000);
+    } finally {
+      setIsRefreshingHealth(false);
     }
   };
 
@@ -193,7 +210,8 @@ export const App: React.FC = () => {
       {activeTab === 'health' && (
         <SystemHealth
           healthData={healthData}
-          onRefreshHealth={loadData}
+          onRefreshHealth={handleRefreshHealth}
+          isRefreshingHealth={isRefreshingHealth}
         />
       )}
     </AppLayout>

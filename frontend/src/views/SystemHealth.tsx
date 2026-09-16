@@ -17,9 +17,10 @@ import {
 interface SystemHealthProps {
   healthData: SystemHealthData | null;
   onRefreshHealth: () => void;
+  isRefreshingHealth?: boolean;
 }
 
-export const SystemHealth: React.FC<SystemHealthProps> = ({ healthData, onRefreshHealth }) => {
+export const SystemHealth: React.FC<SystemHealthProps> = ({ healthData, onRefreshHealth, isRefreshingHealth }) => {
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   if (!healthData) {
@@ -57,13 +58,24 @@ export const SystemHealth: React.FC<SystemHealthProps> = ({ healthData, onRefres
             <p className="text-xs text-slate-400">ACID SQLite WAL integrity, automated Parquet snapshots &amp; NSE trading calendar</p>
           </div>
         </div>
-        <button
-          onClick={onRefreshHealth}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950 hover:bg-cyan-500/15 text-cyan-300 border border-slate-800 hover:border-cyan-500/40 text-xs font-bold font-sans transition-all active:scale-95"
-        >
-          <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Refresh Health</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {healthData?.timestamp && (
+            <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-400 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-800">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Verified: {healthData.timestamp}
+            </span>
+          )}
+          <button
+            onClick={onRefreshHealth}
+            disabled={isRefreshingHealth}
+            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950 hover:bg-cyan-500/15 text-cyan-300 border border-slate-800 hover:border-cyan-500/40 text-xs font-bold font-sans transition-all active:scale-95 ${
+              isRefreshingHealth ? 'opacity-70 cursor-not-allowed' : ''
+            }`}
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isRefreshingHealth ? 'animate-spin' : ''}`} />
+            <span>{isRefreshingHealth ? 'Verifying Integrity...' : 'Refresh Health'}</span>
+          </button>
+        </div>
       </div>
 
       {/* High-Level Status Deck */}
