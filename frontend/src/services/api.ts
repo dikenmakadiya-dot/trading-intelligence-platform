@@ -11,6 +11,18 @@ export function isStaticCloudDeployment(): boolean {
 }
 
 export async function fetchSignals(): Promise<ConsolidatedSignalsPayload> {
+  const t = Date.now();
+
+  // If in static cloud deployment (GitHub Pages), fetch directly from bundled dataset
+  if (isStaticCloudDeployment()) {
+    const staticRes = await fetch(`./data/consolidated_signals.json?t=${t}`, { cache: 'no-cache' });
+    if (!staticRes.ok) {
+      throw new Error('Failed to load signals from static cloud dataset.');
+    }
+    return staticRes.json();
+  }
+
+  // Local / API server mode
   try {
     const res = await fetch(`${BASE_URL}/api/signals`, { cache: 'no-cache' });
     if (res.ok) {
@@ -20,8 +32,7 @@ export async function fetchSignals(): Promise<ConsolidatedSignalsPayload> {
     console.warn('[API] /api/signals unavailable, falling back to static bundled dataset:', err);
   }
 
-  // Cloud / Static fallback with cache-busting
-  const t = Date.now();
+  // Fallback
   const staticRes = await fetch(`./data/consolidated_signals.json?t=${t}`, { cache: 'no-cache' });
   if (!staticRes.ok) {
     throw new Error('Failed to load signals from both API and static fallback.');
@@ -70,6 +81,19 @@ export async function triggerRefresh(mode: 'screener' | 'backtest' = 'screener',
 }
 
 export async function fetchBacktestData(strategyId?: string): Promise<BacktestDataPayload> {
+  const t = Date.now();
+
+  // If in static cloud deployment (GitHub Pages), fetch directly from bundled dataset
+  if (isStaticCloudDeployment()) {
+    const staticRes = await fetch(`./data/verified_backtest_data.json?t=${t}`, { cache: 'no-cache' });
+    if (!staticRes.ok) {
+      throw new Error('Failed to load backtest data from static cloud dataset.');
+    }
+    const fullData = await staticRes.json();
+    return parseBacktestData(fullData, strategyId);
+  }
+
+  // Local / API server mode
   try {
     const url = strategyId 
       ? `${BASE_URL}/api/backtest-data?strategy_id=${encodeURIComponent(strategyId)}`
@@ -82,13 +106,16 @@ export async function fetchBacktestData(strategyId?: string): Promise<BacktestDa
     console.warn('[API] /api/backtest-data unavailable, falling back to static verified dataset:', err);
   }
 
-  // Cloud / Static fallback from verified backtest dataset with cache-busting
-  const t = Date.now();
+  // Fallback
   const staticRes = await fetch(`./data/verified_backtest_data.json?t=${t}`, { cache: 'no-cache' });
   if (!staticRes.ok) {
     throw new Error('Failed to load backtest data from static fallback.');
   }
   const fullData = await staticRes.json();
+  return parseBacktestData(fullData, strategyId);
+}
+
+function parseBacktestData(fullData: any, strategyId?: string): BacktestDataPayload {
   const strategies = fullData.strategies || {};
 
   let kpis: Record<string, any> = {};
@@ -119,6 +146,12 @@ export async function fetchBacktestData(strategyId?: string): Promise<BacktestDa
 }
 
 export async function fetchSystemHealth(): Promise<SystemHealthData> {
+  // If in static cloud deployment (GitHub Pages), use verified health info
+  if (isStaticCloudDeployment()) {
+    return getDefaultSystemHealth();
+  }
+
+  // Local / API server mode
   try {
     const res = await fetch(`${BASE_URL}/api/health`, { cache: 'no-cache' });
     if (res.ok) {
@@ -128,7 +161,11 @@ export async function fetchSystemHealth(): Promise<SystemHealthData> {
     console.warn('[API] /api/health unavailable, using verified system health info:', err);
   }
 
-  // Static cloud fallback
+  // Fallback
+  return getDefaultSystemHealth();
+}
+
+function getDefaultSystemHealth(): SystemHealthData {
   return {
     status: 'HEALTHY',
     timestamp: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST',

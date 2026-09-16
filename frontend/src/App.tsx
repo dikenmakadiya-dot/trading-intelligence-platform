@@ -13,9 +13,11 @@ import {
   fetchSignals,
   fetchBacktestData,
   fetchSystemHealth,
-  triggerRefresh
+  triggerRefresh,
+  isStaticCloudDeployment
 } from './services/api';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { CloudSyncModal } from './components/ui/CloudSyncModal';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('nexus');
@@ -26,6 +28,10 @@ export const App: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRefreshingBacktest, setIsRefreshingBacktest] = useState(false);
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  // Cloud Sync Modal state
+  const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
+  const [cloudModalMode, setCloudModalMode] = useState<'screener' | 'backtest'>('screener');
 
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
     setToastMessage({ text, type });
@@ -58,8 +64,14 @@ export const App: React.FC = () => {
     return () => clearInterval(timer);
   }, [loadData]);
 
-  // Handle Screener Refresh
+  // Handle Screener Refresh / Cloud Hub Open
   const handleRefreshSignals = async () => {
+    if (isStaticCloudDeployment()) {
+      setCloudModalMode('screener');
+      setIsCloudModalOpen(true);
+      return;
+    }
+
     setIsRefreshing(true);
     try {
       const res = await triggerRefresh('screener');
@@ -76,8 +88,14 @@ export const App: React.FC = () => {
     }
   };
 
-  // Handle Backtest Refresh
+  // Handle Backtest Refresh / Cloud Hub Open
   const handleRefreshBacktest = async (strategyId: string) => {
+    if (isStaticCloudDeployment()) {
+      setCloudModalMode('backtest');
+      setIsCloudModalOpen(true);
+      return;
+    }
+
     setIsRefreshingBacktest(true);
     try {
       const res = await triggerRefresh('backtest');
@@ -188,6 +206,15 @@ export const App: React.FC = () => {
           onRefreshHealth={loadData}
         />
       )}
+
+      {/* Interactive Cloud Sync & Action Hub Modal */}
+      <CloudSyncModal
+        isOpen={isCloudModalOpen}
+        onClose={() => setIsCloudModalOpen(false)}
+        mode={cloudModalMode}
+        lastSyncTime={signalsData?.generated_at}
+        onRefreshData={loadData}
+      />
     </AppLayout>
   );
 };
