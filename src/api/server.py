@@ -151,6 +151,51 @@ class QuantFlowRequestHandler(SimpleHTTPRequestHandler):
         except Exception as e:
             self._send_json({"error": f"Failed to retrieve signals: {str(e)}"}, 500)
 
+    def _run_base_historical_update(self) -> Dict[str, Any]:
+        """Runs Stage 1: updates 5Y historical base technical data for 750 NSE stocks."""
+        import subprocess
+        backend_script = PROJECT_ROOT.parent / "5Y Stock Historical Data" / "backend" / "update_daily_nifty750.py"
+        if not backend_script.exists():
+            print(f"[PIPELINE STAGE 1 WARNING] Script not found at {backend_script}, skipping.")
+            return {"status": "skipped", "message": f"Script not found at {backend_script}"}
+
+        print(f"[PIPELINE STAGE 1] Updating 5Y Base Historical Technical Data via {backend_script.name}...")
+        proc = subprocess.run(
+            [sys.executable, str(backend_script)],
+            cwd=str(backend_script.parent),
+            capture_output=True,
+            text=True,
+            timeout=180
+        )
+        if proc.returncode != 0:
+            print(f"[PIPELINE STAGE 1 ERROR] {proc.stderr}")
+            raise RuntimeError(f"Base historical data update failed with code {proc.returncode}: {proc.stderr[:200]}")
+        print(f"[PIPELINE STAGE 1 SUCCESS] 5Y Base Historical Data refreshed successfully.")
+        return {"status": "success", "output": proc.stdout[-300:] if proc.stdout else ""}
+
+    def _sync_output_to_frontend(self):
+        """Copies newly generated outputs to frontend bundle directories so UI reads fresh state."""
+        import shutil
+        dist_data = FRONTEND_DIST_DIR / "data"
+        public_data = PROJECT_ROOT / "frontend" / "public" / "data"
+        for d in [dist_data, public_data]:
+            d.mkdir(parents=True, exist_ok=True)
+
+        if CONSOLIDATED_SIGNALS_JSON.exists():
+            for d in [dist_data, public_data]:
+                try:
+                    shutil.copy2(CONSOLIDATED_SIGNALS_JSON, d / "consolidated_signals.json")
+                except Exception as e:
+                    print(f"[SYNC WARNING] Failed copying signals to {d}: {e}")
+
+        verified_bt = PROJECT_ROOT / "data" / "verified_backtest_data.json"
+        if verified_bt.exists():
+            for d in [dist_data, public_data]:
+                try:
+                    shutil.copy2(verified_bt, d / "verified_backtest_data.json")
+                except Exception as e:
+                    print(f"[SYNC WARNING] Failed copying backtest to {d}: {e}")
+
     def handle_post_refresh(self, payload: Dict[str, Any]):
         """Executes screener or backtest refresh on demand."""
         mode = payload.get("mode", "screener")
@@ -158,12 +203,46 @@ class QuantFlowRequestHandler(SimpleHTTPRequestHandler):
 
         try:
             if mode == "backtest":
+                print("\n[API] Running 5-Year Backtest Simulation on demand...")
                 res = run_all_backtests()
-                self._send_json({"success": True, "mode": "backtest", "result": res})
+                self._sync_output_to_frontend()
+                self._send_json({
+                    "success": True,
+                    "mode": "backtest",
+                    "message": "5-Year Backtest Simulation complete! KPIs and equity curve updated successfully.",
+                    "result": res
+                })
             else:
+                print("\n[API] Running 2-Stage Daily Market Screener on demand...")
+                # Stage 1: Mandatory update of 5Y Historical Base Technical Data
+                base_res = self._run_base_historical_update()
+                
+                # Stage 2: Execute Multi-Strategy Breakout Screeners
                 res = run_all_screeners(target_date=target_date)
-                self._send_json({"success": True, "mode": "screener", "result": res})
+                
+                # Stage 3: Sync results to frontend data directories
+                self._sync_output_to_frontend()
+
+                # Read updated signals to return immediately to the frontend
+                signals_data = {}
+                if CONSOLIDATED_SIGNALS_JSON.exists():
+                    with open(CONSOLIDATED_SIGNALS_JSON, "r", encoding="utf-8") as f:
+                        signals_data = json.load(f)
+
+                total_triggers = signals_data.get("total_triggers", len(res.get("fresh_signals", [])))
+                as_of_date = signals_data.get("as_of_date", datetime.date.today().strftime("%d-%b-%Y"))
+
+                self._send_json({
+                    "success": True,
+                    "mode": "screener",
+                    "message": f"Market Scan Complete! Found {total_triggers} fresh breakout candidates as of {as_of_date}.",
+                    "total_triggers": total_triggers,
+                    "as_of_date": as_of_date,
+                    "data": signals_data,
+                    "base_update": base_res
+                })
         except Exception as e:
+            print(f"[API ERROR] Refresh failed: {e}")
             self._send_json({"success": False, "error": str(e)}, 500)
 
     def handle_get_health(self):

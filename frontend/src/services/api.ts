@@ -40,44 +40,36 @@ export async function fetchSignals(): Promise<ConsolidatedSignalsPayload> {
   return staticRes.json();
 }
 
-export async function triggerRefresh(mode: 'screener' | 'backtest' = 'screener', date?: string): Promise<any> {
-  // If deployed on static cloud (GitHub Pages), there is no live Python backend running locally
-  if (isStaticCloudDeployment()) {
-    if (mode === 'screener') {
-      const t = Date.now();
-      const freshRes = await fetch(`./data/consolidated_signals.json?t=${t}`, { cache: 'no-cache' });
-      if (freshRes.ok) {
-        return {
-          success: true,
-          mode: 'screener',
-          isCloudStatic: true,
-          message: 'Cloud Sync: Loaded latest daily breakout signals. (Automated cloud scanner runs every trading day at 4:15 PM IST).'
-        };
-      }
-    }
-    return {
-      success: true,
-      mode,
-      isCloudStatic: true,
-      message: mode === 'backtest'
-        ? 'Manual Backtest Mode: Audited 5Y KPIs loaded. To run a full cloud simulation, trigger the manual GitHub Actions workflow.'
-        : 'Cloud Sync Active: Daily breakout scanner runs automatically at market close.'
-    };
+export const getApiBaseUrl = (): string => {
+  if (typeof window === 'undefined') return 'http://localhost:8000';
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return window.location.port === '8000' ? '' : 'http://localhost:8000';
   }
+  // If hosted on GitHub Pages or file protocol, point to local Python backend engine
+  return 'http://localhost:8000';
+};
 
-  // Local / API Server mode: execute on Python backend
-  const res = await fetch(`${BASE_URL}/api/refresh`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ mode, date })
-  });
-  if (!res.ok) {
+export async function triggerRefresh(mode: 'screener' | 'backtest' = 'screener', date?: string): Promise<any> {
+  const baseUrl = getApiBaseUrl();
+  try {
+    const res = await fetch(`${baseUrl}/api/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ mode, date })
+    });
+    if (res.ok) {
+      return await res.json();
+    }
     const errText = await res.text();
-    throw new Error(`Failed to trigger refresh: ${res.status} ${errText}`);
+    throw new Error(`Engine returned ${res.status}: ${errText}`);
+  } catch (err: any) {
+    console.error('[API] triggerRefresh error:', err);
+    throw new Error(
+      `QuantFlow local backend engine is offline on port 8000. Start RUN_DAILY_PIPELINE_AND_DASHBOARD.bat on your PC to run live scans.`
+    );
   }
-  return res.json();
 }
 
 export async function fetchBacktestData(strategyId?: string): Promise<BacktestDataPayload> {

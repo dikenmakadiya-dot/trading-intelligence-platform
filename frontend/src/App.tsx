@@ -13,11 +13,9 @@ import {
   fetchSignals,
   fetchBacktestData,
   fetchSystemHealth,
-  triggerRefresh,
-  isStaticCloudDeployment
+  triggerRefresh
 } from './services/api';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
-import { CloudSyncModal } from './components/ui/CloudSyncModal';
+import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('nexus');
@@ -27,15 +25,13 @@ export const App: React.FC = () => {
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRefreshingBacktest, setIsRefreshingBacktest] = useState(false);
-  const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
-  // Cloud Sync Modal state
-  const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
-  const [cloudModalMode, setCloudModalMode] = useState<'screener' | 'backtest'>('screener');
-
-  const showToast = (text: string, type: 'success' | 'error' = 'success') => {
+  const showToast = (text: string, type: 'success' | 'error' | 'info' = 'success', duration: number = 5000) => {
     setToastMessage({ text, type });
-    setTimeout(() => setToastMessage(null), 4000);
+    if (duration > 0) {
+      setTimeout(() => setToastMessage(null), duration);
+    }
   };
 
   // Initial Data Load
@@ -64,50 +60,44 @@ export const App: React.FC = () => {
     return () => clearInterval(timer);
   }, [loadData]);
 
-  // Handle Screener Refresh / Cloud Hub Open
+  // Handle Direct Live Screener Execution (Stage 1: Base Data -> Stage 2: Screeners -> Stage 3: Sync)
   const handleRefreshSignals = async () => {
-    if (isStaticCloudDeployment()) {
-      setCloudModalMode('screener');
-      setIsCloudModalOpen(true);
-      return;
-    }
-
     setIsRefreshing(true);
+    showToast('Executing Stage 1 (Base Historical Data) & Stage 2 (Screeners)...', 'info', 0);
     try {
       const res = await triggerRefresh('screener');
       if (res.success) {
-        showToast(res.message || 'Daily breakout signals refreshed successfully!', 'success');
-        await loadData();
+        showToast(res.message || 'Market Scan Complete! Fresh breakout signals loaded.', 'success', 6000);
+        if (res.data && res.data.all_signals_unified) {
+          setSignalsData(res.data);
+        } else {
+          await loadData();
+        }
       } else {
-        showToast(`Refresh failed: ${res.error || 'Unknown error'}`, 'error');
+        showToast(`Refresh failed: ${res.error || 'Unknown error'}`, 'error', 8000);
       }
     } catch (err: any) {
-      showToast(`Refresh error: ${err.message}`, 'error');
+      showToast(err.message || 'Error running live market scan', 'error', 8000);
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  // Handle Backtest Refresh / Cloud Hub Open
+  // Handle Direct Backtest Execution
   const handleRefreshBacktest = async (strategyId: string) => {
-    if (isStaticCloudDeployment()) {
-      setCloudModalMode('backtest');
-      setIsCloudModalOpen(true);
-      return;
-    }
-
     setIsRefreshingBacktest(true);
+    showToast(`Simulating 5-Year Historical Trades across 750 stocks for ${strategyId}...`, 'info', 0);
     try {
       const res = await triggerRefresh('backtest');
       if (res.success) {
-        showToast(res.message || `Backtest simulation complete for ${strategyId}`, 'success');
+        showToast(res.message || `Backtest simulation complete! Updated KPIs and equity curve.`, 'success', 6000);
         const updatedBt = await fetchBacktestData(strategyId);
         setBacktestData(updatedBt);
       } else {
-        showToast(`Backtest failed: ${res.error || 'Unknown error'}`, 'error');
+        showToast(`Backtest failed: ${res.error || 'Unknown error'}`, 'error', 8000);
       }
     } catch (err: any) {
-      showToast(`Backtest error: ${err.message}`, 'error');
+      showToast(err.message || 'Error running backtest', 'error', 8000);
     } finally {
       setIsRefreshingBacktest(false);
     }
@@ -146,21 +136,21 @@ export const App: React.FC = () => {
       triggerCount={signalsData?.total_triggers || 0}
       gateOpen={safeSignalsData.market_regime.gate_open}
     >
-      {/* Dynamic Toast Feedback */}
+      {/* Dynamic Toast / Status Banner */}
       {toastMessage && (
         <div
-          className={`fixed top-4 right-4 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold font-sans backdrop-blur-xl transition-all ${
+          className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-xs font-bold font-sans backdrop-blur-xl transition-all animate-in fade-in slide-in-from-top-2 duration-200 ${
             toastMessage.type === 'success'
-              ? 'bg-slate-950/95 text-emerald-300 border-emerald-500/40 shadow-[0_0_20px_rgba(0,255,157,0.25)]'
-              : 'bg-slate-950/95 text-rose-300 border-rose-500/40 shadow-[0_0_20px_rgba(255,51,102,0.25)]'
+              ? 'bg-slate-950/95 text-emerald-300 border-emerald-500/50 shadow-[0_0_25px_rgba(0,255,157,0.3)]'
+              : toastMessage.type === 'info'
+              ? 'bg-slate-950/95 text-cyan-300 border-cyan-500/50 shadow-[0_0_25px_rgba(0,229,255,0.3)]'
+              : 'bg-slate-950/95 text-rose-300 border-rose-500/50 shadow-[0_0_25px_rgba(255,51,102,0.3)]'
           }`}
         >
-          {toastMessage.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          ) : (
-            <AlertCircle className="w-4 h-4 text-rose-400" />
-          )}
-          <span>{toastMessage.text}</span>
+          {toastMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+          {toastMessage.type === 'info' && <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />}
+          {toastMessage.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />}
+          <span className="leading-snug max-w-sm">{toastMessage.text}</span>
         </div>
       )}
 
@@ -206,15 +196,6 @@ export const App: React.FC = () => {
           onRefreshHealth={loadData}
         />
       )}
-
-      {/* Interactive Cloud Sync & Action Hub Modal */}
-      <CloudSyncModal
-        isOpen={isCloudModalOpen}
-        onClose={() => setIsCloudModalOpen(false)}
-        mode={cloudModalMode}
-        lastSyncTime={signalsData?.generated_at}
-        onRefreshData={loadData}
-      />
     </AppLayout>
   );
 };
