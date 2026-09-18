@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-18 23:15:20 IST",
+  "generated_at": "2026-09-18 23:07:19 IST",
   "as_of_date": "18-Sep-2026",
   "market_regime": {
     "breadth_pct": 36.8,
@@ -249,7 +249,7 @@
         "exit_reason": null,
         "realized_pnl": null,
         "realized_pnl_pct": null,
-        "updated_at": "2026-09-18 17:45:18"
+        "updated_at": "2026-09-18 17:37:17"
       },
       {
         "id": 37,
@@ -273,7 +273,7 @@
         "exit_reason": null,
         "realized_pnl": null,
         "realized_pnl_pct": null,
-        "updated_at": "2026-09-18 17:45:18"
+        "updated_at": "2026-09-18 17:37:17"
       },
       {
         "id": 36,
@@ -297,7 +297,7 @@
         "exit_reason": null,
         "realized_pnl": null,
         "realized_pnl_pct": null,
-        "updated_at": "2026-09-18 17:45:18"
+        "updated_at": "2026-09-18 17:37:17"
       }
     ]
   },
@@ -324,7 +324,7 @@
       "exit_reason": null,
       "realized_pnl": null,
       "realized_pnl_pct": null,
-      "updated_at": "2026-09-18 17:45:18"
+      "updated_at": "2026-09-18 17:37:17"
     },
     {
       "id": 37,
@@ -348,7 +348,7 @@
       "exit_reason": null,
       "realized_pnl": null,
       "realized_pnl_pct": null,
-      "updated_at": "2026-09-18 17:45:18"
+      "updated_at": "2026-09-18 17:37:17"
     },
     {
       "id": 36,
@@ -372,12 +372,12 @@
       "exit_reason": null,
       "realized_pnl": null,
       "realized_pnl_pct": null,
-      "updated_at": "2026-09-18 17:45:18"
+      "updated_at": "2026-09-18 17:37:17"
     }
   ],
   "backup_status": {
-    "last_snapshot_id": "snapshot_2026-09-18_231518_daily_screener",
-    "created_at": "2026-09-18 23:15:18 IST",
+    "last_snapshot_id": "snapshot_2026-09-18_230717_daily_screener",
+    "created_at": "2026-09-18 23:07:17 IST",
     "integrity_ok": true
   },
   "strategies": {

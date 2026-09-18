@@ -9,7 +9,8 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle2,
-  RefreshCw
+  RefreshCw,
+  ArrowRight
 } from 'lucide-react';
 
 interface MasterStageProps {
@@ -17,9 +18,18 @@ interface MasterStageProps {
   onRefresh: () => void;
   onFastSync?: () => void;
   isRefreshing: boolean;
+  lastSyncTime?: string;
+  onNavigateToBacktest?: (strategyId: string) => void;
 }
 
-export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, onFastSync, isRefreshing }) => {
+export const MasterStage: React.FC<MasterStageProps> = ({
+  data,
+  onRefresh,
+  onFastSync,
+  isRefreshing,
+  lastSyncTime,
+  onNavigateToBacktest
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [strategyFilter, setStrategyFilter] = useState<string>('all');
 
@@ -241,6 +251,15 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, onFas
             <span>Expectancy</span>
             <span className="font-mono font-bold text-emerald-400">+₹8,450 / trade</span>
           </div>
+
+          <button
+            onClick={() => onNavigateToBacktest?.('strategy_1')}
+            className="group mt-2 pt-2 border-t border-slate-800/60 flex items-center justify-between w-full text-[11px] text-cyan-400 hover:text-cyan-300 font-bold transition-all"
+            title="Open 5-Year Strategy Backtesting Simulation"
+          >
+            <span>Explore 5Y Audited Backtest</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 text-cyan-400 transition-transform" />
+          </button>
         </div>
 
       </div>
@@ -319,6 +338,13 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, onFas
               </button>
             </div>
 
+            {lastSyncTime && (
+              <span className="hidden xl:inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-400 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Synced: {lastSyncTime.split(' ')[1] || lastSyncTime}</span>
+              </span>
+            )}
+
             <button
               onClick={onFastSync || onRefresh}
               disabled={isRefreshing}
@@ -384,7 +410,20 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, onFas
                       </div>
                     </td>
                     <td className="py-3.5 px-4 font-sans whitespace-nowrap">
-                      <StrategyBadge strategyId={sig.strategy_id} name={sig.strategy_name} />
+                      {onNavigateToBacktest ? (
+                        <button
+                          onClick={() => onNavigateToBacktest(
+                            sig.strategy_id.includes('clean') ? 'strategy_2' :
+                            sig.strategy_id.includes('gfs') ? 'strategy_3' : 'strategy_1'
+                          )}
+                          className="hover:scale-105 active:scale-95 transition-transform"
+                          title="Click to view 5Y backtesting performance for this strategy"
+                        >
+                          <StrategyBadge strategyId={sig.strategy_id} name={sig.strategy_name} />
+                        </button>
+                      ) : (
+                        <StrategyBadge strategyId={sig.strategy_id} name={sig.strategy_name} />
+                      )}
                     </td>
                     <td className="py-3.5 px-4 text-right font-bold text-white text-sm tabular-nums whitespace-nowrap">
                       ₹{(sig.close || sig.close_price || 0).toFixed(2)}

@@ -77,47 +77,123 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       {/* Main Body */}
       <div className="flex-1 flex max-w-7xl w-full mx-auto pb-24 md:pb-8 relative z-10">
         {/* Desktop Left Sidebar (hidden on mobile) */}
-        <aside className="hidden md:flex flex-col w-64 p-4 border-r border-slate-800/80 shrink-0 gap-6">
+        <aside className="hidden md:flex flex-col w-64 p-4 border-r border-slate-800/80 shrink-0 gap-5">
           {/* Navigation Section */}
-          <div className="space-y-1.5">
-            <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 px-3 mb-2 flex items-center justify-between">
-              <span>Navigation</span>
-              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">PWA</span>
-            </div>
-
-            {navLinks.map((item) => {
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-left transition-all group ${
-                    isActive
-                      ? 'bg-gradient-to-r from-cyan-500/15 via-cyan-500/10 to-transparent text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-950/40'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-900/60 border border-transparent'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className={`transition-transform group-hover:scale-110 ${isActive ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]' : 'text-slate-400'}`}>
-                      {item.icon}
-                    </span>
-                    <div>
-                      <div className="text-xs font-bold leading-tight font-sans">
-                        {item.label}
-                      </div>
-                      <div className="text-[10px] text-slate-500 leading-tight font-mono mt-0.5">
-                        {item.sub}
+          <div className="space-y-4">
+            
+            {/* Group 1: Live Scanner */}
+            <div className="space-y-1">
+              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 px-3 mb-1.5 flex items-center justify-between">
+                <span>Live Scanner</span>
+                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">LIVE</span>
+              </div>
+              {navLinks.filter(i => i.id === 'nexus').map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition-all group ${
+                      isActive
+                        ? 'bg-gradient-to-r from-cyan-500/15 via-cyan-500/10 to-transparent text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-950/40'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-900/60 border border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`transition-transform group-hover:scale-110 ${isActive ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]' : 'text-slate-400'}`}>
+                        {item.icon}
+                      </span>
+                      <div>
+                        <div className="text-xs font-bold leading-tight font-sans">
+                          {item.label}
+                        </div>
+                        <div className="text-[10px] text-slate-500 leading-tight font-mono mt-0.5">
+                          {item.sub}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  {item.badge !== undefined && (
-                    <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm">
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                    {item.badge !== undefined && (
+                      <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm">
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Group 2: 5Y Audited Backtest */}
+            <div className="space-y-1">
+              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400/80 px-3 mb-1.5 flex items-center justify-between">
+                <span>5Y Backtesting</span>
+                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">3 AUDITED</span>
+              </div>
+              {navLinks.filter(i => i.id.startsWith('strategy_')).map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition-all group ${
+                      isActive
+                        ? 'bg-gradient-to-r from-cyan-500/15 via-cyan-500/10 to-transparent text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-950/40'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-900/60 border border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`transition-transform group-hover:scale-110 ${isActive ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]' : 'text-slate-400'}`}>
+                        {item.icon}
+                      </span>
+                      <div>
+                        <div className="text-xs font-bold leading-tight font-sans">
+                          {item.label}
+                        </div>
+                        <div className="text-[10px] text-slate-500 leading-tight font-mono mt-0.5">
+                          {item.sub}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Group 3: System Health */}
+            <div className="space-y-1">
+              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 px-3 mb-1.5 flex items-center justify-between">
+                <span>System & Cloud</span>
+                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">ACID</span>
+              </div>
+              {navLinks.filter(i => i.id === 'health').map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition-all group ${
+                      isActive
+                        ? 'bg-gradient-to-r from-cyan-500/15 via-cyan-500/10 to-transparent text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-950/40'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-900/60 border border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`transition-transform group-hover:scale-110 ${isActive ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]' : 'text-slate-400'}`}>
+                        {item.icon}
+                      </span>
+                      <div>
+                        <div className="text-xs font-bold leading-tight font-sans">
+                          {item.label}
+                        </div>
+                        <div className="text-[10px] text-slate-500 leading-tight font-mono mt-0.5">
+                          {item.sub}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
           </div>
 
           {/* Institutional Status Deck */}

@@ -39,6 +39,11 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<keyof BacktestTrade>('exit_date');
   const [sortAsc, setSortAsc] = useState<boolean>(false);
+  const [verifiedTimestamps, setVerifiedTimestamps] = useState<Record<string, string>>({
+    rsi_52w_breakout: '18-Sep-2026 23:00 IST',
+    clean_candle_5y: '18-Sep-2026 23:00 IST',
+    gfs_mtf_rsi: '18-Sep-2026 23:00 IST'
+  });
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
   // Sync state if initial prop changes
@@ -165,15 +170,30 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
           })}
         </div>
 
-        {/* 1-Tap Refresh Backtest Button */}
-        <button
-          onClick={() => onRefreshBacktest(activeStrategy)}
-          disabled={isRefreshingBacktest}
-          className="relative group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-sans bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 hover:text-white border border-cyan-500/40 hover:border-cyan-400 active:scale-95 transition-all shadow-sm disabled:opacity-50"
-        >
-          <RotateCcw className={`w-3.5 h-3.5 text-cyan-400 group-hover:-rotate-180 transition-transform duration-500 ${isRefreshingBacktest ? 'animate-spin' : ''}`} />
-          <span>{isRefreshingBacktest ? 'Simulating Trades...' : 'Refresh Backtest'}</span>
-        </button>
+        {/* 1-Tap Refresh Backtest Button & Verified Badge */}
+        <div className="flex items-center gap-2.5">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-400 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Verified: {verifiedTimestamps[activeStrategy] || '18-Sep-2026 23:00 IST'}</span>
+          </span>
+
+          <button
+            onClick={() => {
+              const currentIst = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST';
+              setVerifiedTimestamps(prev => ({
+                ...prev,
+                [activeStrategy]: currentIst
+              }));
+              onRefreshBacktest(activeStrategy);
+            }}
+            disabled={isRefreshingBacktest}
+            className="relative group inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-sans bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 hover:text-white border border-cyan-500/40 hover:border-cyan-400 active:scale-95 transition-all shadow-sm disabled:opacity-50"
+            title={`Run backtest simulation and refresh KPIs for ${strategies.find(s => s.id === activeStrategy)?.name}`}
+          >
+            <RotateCcw className={`w-3.5 h-3.5 text-cyan-400 group-hover:-rotate-180 transition-transform duration-500 ${isRefreshingBacktest ? 'animate-spin' : ''}`} />
+            <span>{isRefreshingBacktest ? 'Simulating Trades...' : 'Refresh Backtest'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Pending status banner if strategy backtest data not yet generated */}

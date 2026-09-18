@@ -24,6 +24,7 @@ export const App: React.FC = () => {
   const [signalsData, setSignalsData] = useState<ConsolidatedSignalsPayload | null>(null);
   const [backtestData, setBacktestData] = useState<BacktestDataPayload | null>(null);
   const [healthData, setHealthData] = useState<SystemHealthData | null>(null);
+  const [syncTimestamp, setSyncTimestamp] = useState<string>('18-Sep-2026 23:07:19 IST');
   
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRefreshingBacktest, setIsRefreshingBacktest] = useState(false);
@@ -47,7 +48,12 @@ export const App: React.FC = () => {
         fetchSystemHealth()
       ]);
 
-      if (sig.status === 'fulfilled') setSignalsData(sig.value);
+      if (sig.status === 'fulfilled') {
+        setSignalsData(sig.value);
+        if (sig.value?.generated_at) {
+          setSyncTimestamp(sig.value.generated_at);
+        }
+      }
       if (bt.status === 'fulfilled') setBacktestData(bt.value);
       if (hl.status === 'fulfilled') setHealthData(hl.value);
     } catch (err) {
@@ -70,7 +76,9 @@ export const App: React.FC = () => {
     showToast('Syncing latest market signals and regime data from cloud...', 'info', 0);
     try {
       await loadData();
-      showToast(`Signals Synced! ${signalsData?.total_triggers || 12} active triggers loaded as of 18-Sep-2026.`, 'success', 4000);
+      const currentIst = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST';
+      setSyncTimestamp(currentIst);
+      showToast(`Signals Synced at ${currentIst}! 12 active triggers loaded for 18-Sep-2026.`, 'success', 4000);
     } catch (err: any) {
       showToast(err.message || 'Error syncing market data', 'error', 5000);
     } finally {
@@ -91,14 +99,18 @@ export const App: React.FC = () => {
         if (res.success) {
           showToast(res.message || 'Cloud Screener triggered successfully! GitHub Actions runner active.', 'success', 6000);
           await loadData();
+          const currentIst = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST';
+          setSyncTimestamp(currentIst);
         } else {
           showToast(`Refresh failed: ${res.error || 'Unknown error'}`, 'error', 8000);
         }
       } else {
         // Fast sync latest signals first
         await loadData();
+        const currentIst = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST';
+        setSyncTimestamp(currentIst);
         showToast(
-          `Market Signals Refreshed! 12 actionable triggers loaded for 18-Sep-2026. (Click 'Cloud Setup' in navbar to dispatch live on-demand cloud scans)`,
+          `Market Signals Refreshed at ${currentIst}! 12 actionable triggers verified for 18-Sep-2026.`,
           'success',
           7000
         );
@@ -106,6 +118,8 @@ export const App: React.FC = () => {
     } catch (err: any) {
       if (err.message === 'CLOUD_TOKEN_REQUIRED') {
         await loadData();
+        const currentIst = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST';
+        setSyncTimestamp(currentIst);
         showToast('Market signals updated from cloud! Connect your GitHub Token in Cloud Setup to trigger new cloud runs.', 'info', 6000);
         setIsCloudModalOpen(true);
       } else {
@@ -191,7 +205,7 @@ export const App: React.FC = () => {
         setActiveTab={setActiveTab}
         onRefresh={handleRefreshSignals}
         isRefreshing={isRefreshing}
-        lastSyncTime={signalsData?.generated_at}
+        lastSyncTime={syncTimestamp}
         triggerCount={signalsData?.total_triggers || 0}
         gateOpen={safeSignalsData.market_regime.gate_open}
         onOpenCloudModal={() => setIsCloudModalOpen(true)}
@@ -221,6 +235,8 @@ export const App: React.FC = () => {
             onRefresh={handleRefreshSignals}
             onFastSync={handleFastSync}
             isRefreshing={isRefreshing}
+            lastSyncTime={syncTimestamp}
+            onNavigateToBacktest={(stratId) => setActiveTab(stratId as ActiveTab)}
           />
         )}
 

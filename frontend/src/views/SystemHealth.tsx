@@ -60,9 +60,9 @@ export const SystemHealth: React.FC<SystemHealthProps> = ({ healthData, onRefres
         </div>
         <div className="flex items-center gap-3">
           {healthData?.timestamp && (
-            <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono text-slate-400 bg-slate-900/60 px-3 py-1.5 rounded-lg border border-slate-800">
+            <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-mono text-slate-400 bg-slate-950 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-800">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Verified: {healthData.timestamp}
+              <span>Verified: {healthData.timestamp}</span>
             </span>
           )}
           <button
