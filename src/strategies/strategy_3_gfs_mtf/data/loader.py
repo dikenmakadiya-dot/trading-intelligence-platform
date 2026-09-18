@@ -89,14 +89,24 @@ def discover_latest_historical_dataset(preferred_name: Optional[str] = None) -> 
     Dynamically scans surrounding directories to discover the latest historical technical dataset.
     Prioritizes active Nifty 750/500 files by latest modification time and file size.
     """
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    try:
+        from config.settings import REPO_PARQUET_PATH, REPO_CSV_PATH, DEFAULT_MASTER_CSV
+        if REPO_PARQUET_PATH.exists():
+            return str(REPO_PARQUET_PATH)
+        if REPO_CSV_PATH.exists():
+            return str(REPO_CSV_PATH)
+        if DEFAULT_MASTER_CSV.exists():
+            return str(DEFAULT_MASTER_CSV)
+    except Exception:
+        pass
+
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
     search_dirs = [
+        os.path.join(project_root, "data"),
         os.path.abspath(os.path.join(project_root, "..", "5Y Stock Historical Data")),
         os.path.abspath(os.path.join(project_root, "..", "..", "5Y Stock Historical Data")),
         os.path.abspath(os.path.join(project_root, "..", "Stock Historical Data")),
         os.path.abspath(os.path.join(project_root, "..", "..", "Stock Historical Data")),
-        r"G:\.shortcut-targets-by-id\1SJr8rXDLvFctNFM-ykseyMUT2bClQG8H\Antigravity Projects\Trading\5Y Stock Historical Data",
-        r"G:\.shortcut-targets-by-id\1SJr8rXDLvFctNFM-ykseyMUT2bClQG8H\Antigravity Projects\Stock Historical Data",
         os.path.abspath(os.path.join(project_root, "..")),
         project_root,
     ]
@@ -105,14 +115,14 @@ def discover_latest_historical_dataset(preferred_name: Optional[str] = None) -> 
     for d in search_dirs:
         if os.path.exists(d) and os.path.isdir(d):
             for fname in os.listdir(d):
-                if fname.endswith(".csv") and ("nifty" in fname.lower() or "technical" in fname.lower() or "historical" in fname.lower()):
+                if (fname.endswith(".parquet") or fname.endswith(".csv")) and ("nifty" in fname.lower() or "technical" in fname.lower() or "historical" in fname.lower()):
                     full_p = os.path.join(d, fname)
                     if os.path.isfile(full_p):
                         try:
                             stat = os.stat(full_p)
-                            # Give priority to 750 / 500 active files
-                            priority = 2 if "750" in fname else (1 if "500" in fname else 0)
-                            found_files.append((priority, stat.st_mtime, stat.st_size, full_p))
+                            # Give priority to parquet (3), 750 (2), 500 (1)
+                            prio = 3 if fname.endswith(".parquet") else (2 if "750" in fname else (1 if "500" in fname else 0))
+                            found_files.append((prio, stat.st_mtime, stat.st_size, full_p))
                         except Exception:
                             pass
 
@@ -121,8 +131,7 @@ def discover_latest_historical_dataset(preferred_name: Optional[str] = None) -> 
         found_files.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
         return found_files[0][3]
 
-    # Fallback to default
-    return r"G:\.shortcut-targets-by-id\1SJr8rXDLvFctNFM-ykseyMUT2bClQG8H\Antigravity Projects\Trading\5Y Stock Historical Data\nifty750_historical_technical_data_5y.csv"
+    return str(REPO_PARQUET_PATH)
 
 
 def load_nifty500_data(
@@ -132,10 +141,10 @@ def load_nifty500_data(
 ) -> pd.DataFrame:
     """
     Loads historical technical dataset dynamically with strict date parsing,
-    sorting by ['Symbol', 'Date'], and type optimization.
+    sorting by ['Symbol', 'Date'], and type optimization. Supports both Parquet and CSV.
 
     Args:
-        csv_path: Absolute or relative path to CSV file. If None or not found, dynamically discovers latest file.
+        csv_path: Absolute or relative path to file. If None or not found, dynamically discovers latest file.
         usecols: Optional list of column names to load. If None, loads DEFAULT_OHLCV_COLS.
         validate: Whether to run integrity validation checks.
 
@@ -146,24 +155,34 @@ def load_nifty500_data(
         csv_path = discover_latest_historical_dataset()
     
     if not os.path.exists(csv_path):
-        raise FileNotFoundError(f"Historical dataset CSV not found at: {csv_path}")
+        raise FileNotFoundError(f"Historical dataset not found at: {csv_path}")
 
-    # Read CSV with specified columns
+    # Read with specified columns
     cols_to_load = usecols if usecols is not None else DEFAULT_OHLCV_COLS
     
-    # Try reading requested cols; if some optional ones don't exist in CSV, fall back cleanly
-    try:
-        df = pd.read_csv(csv_path, usecols=cols_to_load)
-    except ValueError:
-        # If some columns in cols_to_load do not exist, load available columns
-        df = pd.read_csv(csv_path)
-        avail = [c for c in cols_to_load if c in df.columns]
-        df = df[avail]
+    if csv_path.endswith(".parquet"):
+        try:
+            df = pd.read_parquet(csv_path, columns=cols_to_load)
+        except Exception:
+            df = pd.read_parquet(csv_path)
+            avail = [c for c in cols_to_load if c in df.columns]
+            df = df[avail]
+    else:
+        try:
+            df = pd.read_csv(csv_path, usecols=cols_to_load)
+        except ValueError:
+            df = pd.read_csv(csv_path)
+            avail = [c for c in cols_to_load if c in df.columns]
+            df = df[avail]
 
     # Fast explicit format parsing using unique date map
-    unique_dates = df["Date"].unique()
-    date_map = dict(zip(unique_dates, pd.to_datetime(unique_dates, format="%d-%m-%Y")))
-    df["Date"] = df["Date"].map(date_map)
+    if not pd.api.types.is_datetime64_any_dtype(df["Date"]):
+        unique_dates = df["Date"].dropna().unique()
+        try:
+            date_map = dict(zip(unique_dates, pd.to_datetime(unique_dates, format="%d-%m-%Y")))
+            df["Date"] = df["Date"].map(date_map)
+        except Exception:
+            df["Date"] = pd.to_datetime(df["Date"])
 
     # Ensure numeric columns are float64 / int64
     for num_col in ["Open", "High", "Low", "Close"]:

@@ -40,16 +40,88 @@ export async function fetchSignals(): Promise<ConsolidatedSignalsPayload> {
   return staticRes.json();
 }
 
+export const GITHUB_REPO_OWNER = 'dikenmakadiya-dot';
+export const GITHUB_REPO_NAME = 'trading-intelligence-platform';
+
 export const getApiBaseUrl = (): string => {
   if (typeof window === 'undefined') return 'http://localhost:8000';
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return window.location.port === '8000' ? '' : 'http://localhost:8000';
   }
-  // If hosted on GitHub Pages or file protocol, point to local Python backend engine
   return 'http://localhost:8000';
 };
 
-export async function triggerRefresh(mode: 'screener' | 'backtest' = 'screener', date?: string): Promise<any> {
+export function getStoredGitHubToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('quantflow_github_token');
+}
+
+export function setStoredGitHubToken(token: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('quantflow_github_token', token.trim());
+}
+
+export function clearStoredGitHubToken(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('quantflow_github_token');
+}
+
+export async function dispatchCloudWorkflow(
+  mode: 'screener' | 'backtest' = 'screener',
+  targetDate?: string,
+  onStatusUpdate?: (status: string) => void
+): Promise<{ success: boolean; message: string }> {
+  const token = getStoredGitHubToken();
+  if (!token) {
+    throw new Error('CLOUD_TOKEN_REQUIRED');
+  }
+
+  const workflowId = mode === 'backtest' ? 'manual_backtest.yml' : 'daily_screener_cron.yml';
+  const inputs = mode === 'screener' && targetDate ? { target_date: targetDate } : {};
+
+  if (onStatusUpdate) onStatusUpdate('🚀 Contacting GitHub Actions Cloud Runner...');
+
+  const dispatchUrl = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/actions/workflows/${workflowId}/dispatches`;
+
+  const res = await fetch(dispatchUrl, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/vnd.github.v3+json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ ref: 'main', inputs })
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    if (res.status === 401 || res.status === 403) {
+      clearStoredGitHubToken();
+      throw new Error('GitHub Token expired or lacks "repo" / "workflow" permissions. Please reconnect your token.');
+    }
+    throw new Error(`Cloud trigger failed (${res.status}): ${errData.message || 'Check GitHub permissions.'}`);
+  }
+
+  if (onStatusUpdate) onStatusUpdate('⏳ Cloud Runner active! Multi-strategy pipeline executing in GitHub Cloud...');
+
+  return {
+    success: true,
+    message: mode === 'screener'
+      ? 'Cloud Screener triggered successfully! GitHub Actions is updating 5Y data and running multi-strategy screeners in the cloud.'
+      : 'Cloud Backtest Simulation triggered! Multi-year performance audit executing in GitHub Cloud.'
+  };
+}
+
+export async function triggerRefresh(
+  mode: 'screener' | 'backtest' = 'screener',
+  date?: string,
+  onStatusUpdate?: (status: string) => void
+): Promise<any> {
+  // 1. If hosted on GitHub Pages (static cloud deployment), trigger directly via GitHub Actions Cloud Runner
+  if (isStaticCloudDeployment()) {
+    return await dispatchCloudWorkflow(mode, date, onStatusUpdate);
+  }
+
+  // 2. If running on local server, try local engine first
   const baseUrl = getApiBaseUrl();
   try {
     const res = await fetch(`${baseUrl}/api/refresh`, {
@@ -65,10 +137,12 @@ export async function triggerRefresh(mode: 'screener' | 'backtest' = 'screener',
     const errText = await res.text();
     throw new Error(`Engine returned ${res.status}: ${errText}`);
   } catch (err: any) {
-    console.error('[API] triggerRefresh error:', err);
-    throw new Error(
-      `QuantFlow local backend engine is offline on port 8000. Start RUN_DAILY_PIPELINE_AND_DASHBOARD.bat on your PC to run live scans.`
-    );
+    console.warn('[API] Local engine unavailable, falling back to cloud runner if token is connected...');
+    const token = getStoredGitHubToken();
+    if (token) {
+      return await dispatchCloudWorkflow(mode, date, onStatusUpdate);
+    }
+    throw new Error('CLOUD_TOKEN_REQUIRED');
   }
 }
 

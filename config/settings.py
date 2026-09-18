@@ -28,11 +28,27 @@ BACKUP_RETENTION_DAYS = int(os.getenv("BACKUP_RETENTION_DAYS", "30"))
 for p in [OUTPUT_DIR, BACKTEST_OUTPUT_DIR, LIVE_SIGNALS_OUTPUT_DIR, BACKUP_DIR, DATA_DIR, DB_DIR]:
     p.mkdir(parents=True, exist_ok=True)
 
-# Historical Data Paths
+# Historical Data Paths (Adaptive for Cloud Runners & Local Environment)
+REPO_PARQUET_PATH = DATA_DIR / "nifty750_historical_technical_data_5y.parquet"
+REPO_CSV_PATH = DATA_DIR / "nifty750_historical_technical_data_5y.csv"
+
 HISTORICAL_DATA_DIR = TRADING_ROOT / "5Y Stock Historical Data"
-DEFAULT_MASTER_CSV = HISTORICAL_DATA_DIR / "nifty750_historical_technical_data_5y.csv"
-DEFAULT_MASTER_XLSX = HISTORICAL_DATA_DIR / "nifty750_historical_technical_data_5y.xlsx"
-DATA_FILE_PATH = DEFAULT_MASTER_CSV
+LOCAL_MASTER_CSV = HISTORICAL_DATA_DIR / "nifty750_historical_technical_data_5y.csv"
+LOCAL_MASTER_XLSX = HISTORICAL_DATA_DIR / "nifty750_historical_technical_data_5y.xlsx"
+
+# Automatically resolve master data file
+if REPO_PARQUET_PATH.exists():
+    DEFAULT_MASTER_DATA = REPO_PARQUET_PATH
+elif REPO_CSV_PATH.exists():
+    DEFAULT_MASTER_DATA = REPO_CSV_PATH
+elif LOCAL_MASTER_CSV.exists():
+    DEFAULT_MASTER_DATA = LOCAL_MASTER_CSV
+else:
+    DEFAULT_MASTER_DATA = REPO_PARQUET_PATH
+
+DEFAULT_MASTER_CSV = DEFAULT_MASTER_DATA
+DEFAULT_MASTER_XLSX = LOCAL_MASTER_XLSX if LOCAL_MASTER_XLSX.exists() else None
+DATA_FILE_PATH = DEFAULT_MASTER_DATA
 
 CONSOLIDATED_SIGNALS_JSON = OUTPUT_DIR / "consolidated_signals.json"
 STRATEGY_SUMMARY_JSON = OUTPUT_DIR / "strategy_summary.json"

@@ -70,6 +70,7 @@ jobs:
           mkdir -p frontend/public/data
           cp -f output/consolidated_signals.json frontend/public/data/ 2>/dev/null || true
           cp -f data/verified_backtest_data.json frontend/public/data/ 2>/dev/null || true
+          cp -f output/system_health.json frontend/public/data/ 2>/dev/null || true
 
       - name: Compile Production PWA Bundle
         working-directory: frontend

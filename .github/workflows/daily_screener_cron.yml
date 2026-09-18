@@ -55,6 +55,7 @@ jobs:
           else
             python src/orchestrator.py --mode screener
           fi
+          python -c "import json; d=json.load(open('output/consolidated_signals.json')); print(f'[CRON STATS] Extracted {d.get(\"total_triggers\")} triggers for {d.get(\"as_of_date\")}')"
 
       - name: Upload Daily Signals Artifacts (Archive)
         uses: actions/upload-artifact@v4
@@ -62,6 +63,7 @@ jobs:
           name: daily-signals-and-db-backup
           path: |
             output/consolidated_signals.json
+            output/system_health.json
             output/backups/
             data/trading_platform.db
           retention-days: 30
@@ -82,6 +84,7 @@ jobs:
           mkdir -p frontend/public/data
           cp -f output/consolidated_signals.json frontend/public/data/ 2>/dev/null || true
           cp -f data/verified_backtest_data.json frontend/public/data/ 2>/dev/null || true
+          cp -f output/system_health.json frontend/public/data/ 2>/dev/null || true
 
       - name: Compile Production PWA Bundle
         working-directory: frontend

@@ -8,6 +8,7 @@ $RECYCLE.BIN/
 *.csv
 *.xlsx
 *.parquet
+!data/nifty750_historical_technical_data_5y.parquet
 *.h5
 *.feather
 *.tar.gz
@@ -49,7 +50,9 @@ sync_log.json
 /outputs/
 **/outputs/
 **/output/
-/data/
+/data/*
+!data/nifty750_historical_technical_data_5y.parquet
+!data/verified_backtest_data.json
 !frontend/public/data/
 !frontend/public/data/**
 **/desktop.ini

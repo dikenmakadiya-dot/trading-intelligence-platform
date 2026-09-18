@@ -1,4 +1,4 @@
-﻿"""
+"""
 Universal Data Loader for NIFTY 750 Technical Dataset
 """
 
@@ -18,7 +18,10 @@ def load_master_dataset(filepath: Optional[str] = None, columns: Optional[List[s
     if not path.exists():
         raise FileNotFoundError(f"Master technical dataset not found at: {path}")
 
-    df = pd.read_csv(path, usecols=columns, low_memory=False)
+    if str(path).lower().endswith(".parquet"):
+        df = pd.read_parquet(path, columns=columns)
+    else:
+        df = pd.read_csv(path, usecols=columns, low_memory=False)
 
     # Standardize Date column
     if "Date" in df.columns:

@@ -12,6 +12,7 @@ interface AppLayoutProps {
   lastSyncTime?: string;
   triggerCount?: number;
   gateOpen?: boolean;
+  onOpenCloudModal?: () => void;
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({
@@ -22,7 +23,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   isRefreshing,
   lastSyncTime,
   triggerCount = 0,
-  gateOpen = true
+  gateOpen = true,
+  onOpenCloudModal
 }) => {
   const navLinks: Array<{ id: ActiveTab; label: string; sub: string; icon: React.ReactNode; badge?: number }> = [
     {
@@ -69,6 +71,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         isRefreshing={isRefreshing}
         lastSyncTime={lastSyncTime}
         gateOpen={gateOpen}
+        onOpenCloudModal={onOpenCloudModal}
       />
 
       {/* Main Body */}

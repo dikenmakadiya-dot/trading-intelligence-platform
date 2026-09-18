@@ -4,6 +4,7 @@ import { ActiveTab } from './components/layout/MobileDock';
 import { MasterStage } from './views/MasterStage';
 import { StrategyDashboard } from './views/StrategyDashboard';
 import { SystemHealth } from './views/SystemHealth';
+import { CloudConnectModal } from './components/CloudConnectModal';
 import {
   ConsolidatedSignalsPayload,
   BacktestDataPayload,
@@ -26,6 +27,7 @@ export const App: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRefreshingBacktest, setIsRefreshingBacktest] = useState(false);
   const [isRefreshingHealth, setIsRefreshingHealth] = useState(false);
+  const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const showToast = (text: string, type: 'success' | 'error' | 'info' = 'success', duration: number = 5000) => {
@@ -61,12 +63,14 @@ export const App: React.FC = () => {
     return () => clearInterval(timer);
   }, [loadData]);
 
-  // Handle Direct Live Screener Execution (Stage 1: Base Data -> Stage 2: Screeners -> Stage 3: Sync)
+  // Handle Cloud / Local Live Screener Execution
   const handleRefreshSignals = async () => {
     setIsRefreshing(true);
-    showToast('Executing Stage 1 (Base Historical Data) & Stage 2 (Screeners)...', 'info', 0);
+    showToast('Initiating Multi-Strategy Market Screener...', 'info', 0);
     try {
-      const res = await triggerRefresh('screener');
+      const res = await triggerRefresh('screener', undefined, (statusText: string) => {
+        showToast(statusText, 'info', 0);
+      });
       if (res.success) {
         showToast(res.message || 'Market Scan Complete! Fresh breakout signals loaded.', 'success', 6000);
         if (res.data && res.data.all_signals_unified) {
@@ -78,27 +82,39 @@ export const App: React.FC = () => {
         showToast(`Refresh failed: ${res.error || 'Unknown error'}`, 'error', 8000);
       }
     } catch (err: any) {
-      showToast(err.message || 'Error running live market scan', 'error', 8000);
+      if (err.message === 'CLOUD_TOKEN_REQUIRED') {
+        showToast('Connect your GitHub Token to trigger cloud screeners without your PC.', 'info', 5000);
+        setIsCloudModalOpen(true);
+      } else {
+        showToast(err.message || 'Error running live market scan', 'error', 8000);
+      }
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  // Handle Direct Backtest Execution
+  // Handle Cloud / Local Backtest Execution
   const handleRefreshBacktest = async (strategyId: string) => {
     setIsRefreshingBacktest(true);
-    showToast(`Simulating 5-Year Historical Trades across 750 stocks for ${strategyId}...`, 'info', 0);
+    showToast(`Initiating 5-Year Backtest Simulation for ${strategyId}...`, 'info', 0);
     try {
-      const res = await triggerRefresh('backtest');
+      const res = await triggerRefresh('backtest', undefined, (statusText: string) => {
+        showToast(statusText, 'info', 0);
+      });
       if (res.success) {
-        showToast(res.message || `Backtest simulation complete! Updated KPIs and equity curve.`, 'success', 6000);
+        showToast(res.message || `Backtest simulation initiated!`, 'success', 6000);
         const updatedBt = await fetchBacktestData(strategyId);
         setBacktestData(updatedBt);
       } else {
         showToast(`Backtest failed: ${res.error || 'Unknown error'}`, 'error', 8000);
       }
     } catch (err: any) {
-      showToast(err.message || 'Error running backtest', 'error', 8000);
+      if (err.message === 'CLOUD_TOKEN_REQUIRED') {
+        showToast('Connect your GitHub Token to run cloud backtest simulations without your PC.', 'info', 5000);
+        setIsCloudModalOpen(true);
+      } else {
+        showToast(err.message || 'Error running backtest', 'error', 8000);
+      }
     } finally {
       setIsRefreshingBacktest(false);
     }
@@ -144,77 +160,87 @@ export const App: React.FC = () => {
   };
 
   return (
-    <AppLayout
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      onRefresh={handleRefreshSignals}
-      isRefreshing={isRefreshing}
-      lastSyncTime={signalsData?.generated_at}
-      triggerCount={signalsData?.total_triggers || 0}
-      gateOpen={safeSignalsData.market_regime.gate_open}
-    >
-      {/* Dynamic Toast / Status Banner */}
-      {toastMessage && (
-        <div
-          className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-xs font-bold font-sans backdrop-blur-xl transition-all animate-in fade-in slide-in-from-top-2 duration-200 ${
-            toastMessage.type === 'success'
-              ? 'bg-slate-950/95 text-emerald-300 border-emerald-500/50 shadow-[0_0_25px_rgba(0,255,157,0.3)]'
-              : toastMessage.type === 'info'
-              ? 'bg-slate-950/95 text-cyan-300 border-cyan-500/50 shadow-[0_0_25px_rgba(0,229,255,0.3)]'
-              : 'bg-slate-950/95 text-rose-300 border-rose-500/50 shadow-[0_0_25px_rgba(255,51,102,0.3)]'
-          }`}
-        >
-          {toastMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
-          {toastMessage.type === 'info' && <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />}
-          {toastMessage.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />}
-          <span className="leading-snug max-w-sm">{toastMessage.text}</span>
-        </div>
-      )}
+    <>
+      <AppLayout
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onRefresh={handleRefreshSignals}
+        isRefreshing={isRefreshing}
+        lastSyncTime={signalsData?.generated_at}
+        triggerCount={signalsData?.total_triggers || 0}
+        gateOpen={safeSignalsData.market_regime.gate_open}
+        onOpenCloudModal={() => setIsCloudModalOpen(true)}
+      >
+        {/* Dynamic Toast / Status Banner */}
+        {toastMessage && (
+          <div
+            className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border text-xs font-bold font-sans backdrop-blur-xl transition-all animate-in fade-in slide-in-from-top-2 duration-200 ${
+              toastMessage.type === 'success'
+                ? 'bg-slate-950/95 text-emerald-300 border-emerald-500/50 shadow-[0_0_25px_rgba(0,255,157,0.3)]'
+                : toastMessage.type === 'info'
+                ? 'bg-slate-950/95 text-cyan-300 border-cyan-500/50 shadow-[0_0_25px_rgba(0,229,255,0.3)]'
+                : 'bg-slate-950/95 text-rose-300 border-rose-500/50 shadow-[0_0_25px_rgba(255,51,102,0.3)]'
+            }`}
+          >
+            {toastMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />}
+            {toastMessage.type === 'info' && <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />}
+            {toastMessage.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />}
+            <span className="leading-snug max-w-sm">{toastMessage.text}</span>
+          </div>
+        )}
 
-      {/* Screen Views */}
-      {activeTab === 'nexus' && (
-        <MasterStage
-          data={safeSignalsData}
-          onRefresh={handleRefreshSignals}
-          isRefreshing={isRefreshing}
-        />
-      )}
+        {/* Screen Views */}
+        {activeTab === 'nexus' && (
+          <MasterStage
+            data={safeSignalsData}
+            onRefresh={handleRefreshSignals}
+            isRefreshing={isRefreshing}
+          />
+        )}
 
-      {activeTab === 'strategy_1' && (
-        <StrategyDashboard
-          initialStrategyId="rsi_52w_breakout"
-          backtestData={backtestData}
-          onRefreshBacktest={handleRefreshBacktest}
-          isRefreshingBacktest={isRefreshingBacktest}
-        />
-      )}
+        {activeTab === 'strategy_1' && (
+          <StrategyDashboard
+            initialStrategyId="rsi_52w_breakout"
+            backtestData={backtestData}
+            onRefreshBacktest={handleRefreshBacktest}
+            isRefreshingBacktest={isRefreshingBacktest}
+          />
+        )}
 
-      {activeTab === 'strategy_2' && (
-        <StrategyDashboard
-          initialStrategyId="clean_candle_5y"
-          backtestData={backtestData}
-          onRefreshBacktest={handleRefreshBacktest}
-          isRefreshingBacktest={isRefreshingBacktest}
-        />
-      )}
+        {activeTab === 'strategy_2' && (
+          <StrategyDashboard
+            initialStrategyId="clean_candle_5y"
+            backtestData={backtestData}
+            onRefreshBacktest={handleRefreshBacktest}
+            isRefreshingBacktest={isRefreshingBacktest}
+          />
+        )}
 
-      {activeTab === 'strategy_3' && (
-        <StrategyDashboard
-          initialStrategyId="gfs_mtf_rsi"
-          backtestData={backtestData}
-          onRefreshBacktest={handleRefreshBacktest}
-          isRefreshingBacktest={isRefreshingBacktest}
-        />
-      )}
+        {activeTab === 'strategy_3' && (
+          <StrategyDashboard
+            initialStrategyId="gfs_mtf_rsi"
+            backtestData={backtestData}
+            onRefreshBacktest={handleRefreshBacktest}
+            isRefreshingBacktest={isRefreshingBacktest}
+          />
+        )}
 
-      {activeTab === 'health' && (
-        <SystemHealth
-          healthData={healthData}
-          onRefreshHealth={handleRefreshHealth}
-          isRefreshingHealth={isRefreshingHealth}
-        />
-      )}
-    </AppLayout>
+        {activeTab === 'health' && (
+          <SystemHealth
+            healthData={healthData}
+            onRefreshHealth={handleRefreshHealth}
+            isRefreshingHealth={isRefreshingHealth}
+          />
+        )}
+      </AppLayout>
+
+      {/* 100% Cloud Automation Connector Modal */}
+      <CloudConnectModal
+        isOpen={isCloudModalOpen}
+        onClose={() => setIsCloudModalOpen(false)}
+        onConnected={() => loadData()}
+      />
+    </>
   );
 };
 export default App;

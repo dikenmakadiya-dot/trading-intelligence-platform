@@ -6,13 +6,15 @@ interface NavbarProps {
   isRefreshing: boolean;
   lastSyncTime?: string;
   gateOpen?: boolean;
+  onOpenCloudModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onRefresh,
   isRefreshing,
   lastSyncTime,
-  gateOpen = true
+  gateOpen = true,
+  onOpenCloudModal
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full bg-slate-950/85 backdrop-blur-xl border-b border-cyan-500/15 px-4 py-3 sm:px-8 shadow-2xl">
@@ -41,7 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium whitespace-nowrap">
               <span className="inline-flex items-center gap-1.5 text-emerald-400 font-semibold">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
-                <span>CLOUD SYNC</span>
+                <span>100% CLOUD</span>
               </span>
               <span className="text-slate-600">•</span>
               <span className={`inline-flex items-center font-semibold ${gateOpen ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -60,11 +62,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="beacon-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
-            <span className="text-xs font-bold text-slate-200 whitespace-nowrap">ORCHESTRATOR ACTIVE</span>
+            <span className="text-xs font-bold text-slate-200 whitespace-nowrap">CLOUD RUNNER ACTIVE</span>
           </div>
           <span className="text-slate-700">|</span>
           <div className="text-xs text-slate-400 font-mono whitespace-nowrap">
-            SYNC: <span className="text-slate-200 font-semibold">{lastSyncTime || '11-Sep-2026 16:15 IST'}</span>
+            SYNC: <span className="text-slate-200 font-semibold">{lastSyncTime || '18-Sep-2026 16:15 IST'}</span>
           </div>
           <span className="text-slate-700">|</span>
           <div className={`text-xs font-bold inline-flex items-center gap-1.5 whitespace-nowrap ${gateOpen ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -75,6 +77,18 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right side controls */}
         <div className="flex items-center gap-3">
+          {/* Cloud Connector Button */}
+          {onOpenCloudModal && (
+            <button
+              onClick={onOpenCloudModal}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 border border-slate-800 hover:border-cyan-500/40 transition-all shadow-sm"
+              title="Configure 100% Cloud Automation"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="hidden md:inline">Cloud Setup</span>
+            </button>
+          )}
+
           {lastSyncTime && (
             <div className="hidden sm:flex lg:hidden flex-col text-right text-xs">
               <span className="text-slate-500 text-[10px] uppercase font-bold">Last Synced</span>
@@ -93,7 +107,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <RefreshCw className={`w-4 h-4 text-cyan-400 group-hover:rotate-180 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">
-              {isRefreshing ? 'Scanning Market...' : 'Scan Market Now'}
+              {isRefreshing ? 'Triggering Cloud...' : 'Scan Market Now'}
             </span>
           </button>
         </div>
