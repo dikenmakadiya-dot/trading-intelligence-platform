@@ -134,7 +134,12 @@ def run_all_screeners(target_date: str = None) -> Dict[str, Any]:
     print(f"[SUCCESS] Master Stage Consolidated Payload saved to:\n   {CONSOLIDATED_SIGNALS_JSON}")
     print(f"   Total Actionable Breakout Triggers Across All Strategies: {len(all_signals_unified)}")
     print(f"   Active Open Positions Tracked: {len(portfolio_summary.get('positions', []))}")
-    print("=" * 70)
+    # Generate & Sync System Health Snapshot
+    try:
+        from src.core.system_health import generate_system_health
+        generate_system_health()
+    except Exception as he:
+        print(f"[HEALTH WARNING] Failed generating system health: {he}")
 
     return consolidated
 
@@ -196,6 +201,13 @@ def run_all_backtests() -> Dict[str, Any]:
     print("\n" + "=" * 70)
     print(f"[SUCCESS] Backtest Summary saved to:\n   {STRATEGY_SUMMARY_JSON}")
     print("=" * 70)
+
+    # Generate & Sync System Health Snapshot
+    try:
+        from src.core.system_health import generate_system_health
+        generate_system_health()
+    except Exception as he:
+        print(f"[HEALTH WARNING] Failed generating system health: {he}")
 
     return summaries
 

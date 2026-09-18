@@ -24,6 +24,7 @@ interface StrategyDashboardProps {
   initialStrategyId: string;
   backtestData: BacktestDataPayload | null;
   onRefreshBacktest: (strategyId: string) => void;
+  onSelectStrategy?: (strategyId: string) => void;
   isRefreshingBacktest: boolean;
 }
 
@@ -31,6 +32,7 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
   initialStrategyId,
   backtestData,
   onRefreshBacktest,
+  onSelectStrategy,
   isRefreshingBacktest
 }) => {
   const [activeStrategy, setActiveStrategy] = useState<string>(initialStrategyId);
@@ -147,7 +149,10 @@ export const StrategyDashboard: React.FC<StrategyDashboardProps> = ({
             return (
               <button
                 key={strat.id}
-                onClick={() => setActiveStrategy(strat.id)}
+                onClick={() => {
+                  setActiveStrategy(strat.id);
+                  if (onSelectStrategy) onSelectStrategy(strat.id);
+                }}
                 className={`px-4 py-2 rounded-xl text-xs font-bold font-sans transition-all ${
                   isActive
                     ? 'bg-gradient-to-r from-cyan-500/20 to-emerald-500/15 text-cyan-300 border border-cyan-500/40 shadow-lg shadow-cyan-950/50'

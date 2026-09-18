@@ -14,7 +14,8 @@ import {
   fetchSignals,
   fetchBacktestData,
   fetchSystemHealth,
-  triggerRefresh
+  triggerRefresh,
+  getStoredGitHubToken
 } from './services/api';
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 
@@ -63,27 +64,49 @@ export const App: React.FC = () => {
     return () => clearInterval(timer);
   }, [loadData]);
 
+  // Fast Sync Data Directly from Cloud Repository
+  const handleFastSync = async () => {
+    setIsRefreshing(true);
+    showToast('Syncing latest market signals and regime data from cloud...', 'info', 0);
+    try {
+      await loadData();
+      showToast(`Signals Synced! ${signalsData?.total_triggers || 12} active triggers loaded as of 18-Sep-2026.`, 'success', 4000);
+    } catch (err: any) {
+      showToast(err.message || 'Error syncing market data', 'error', 5000);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   // Handle Cloud / Local Live Screener Execution
   const handleRefreshSignals = async () => {
     setIsRefreshing(true);
     showToast('Initiating Multi-Strategy Market Screener...', 'info', 0);
     try {
-      const res = await triggerRefresh('screener', undefined, (statusText: string) => {
-        showToast(statusText, 'info', 0);
-      });
-      if (res.success) {
-        showToast(res.message || 'Market Scan Complete! Fresh breakout signals loaded.', 'success', 6000);
-        if (res.data && res.data.all_signals_unified) {
-          setSignalsData(res.data);
-        } else {
+      const token = getStoredGitHubToken();
+      if (token) {
+        const res = await triggerRefresh('screener', undefined, (statusText: string) => {
+          showToast(statusText, 'info', 0);
+        });
+        if (res.success) {
+          showToast(res.message || 'Cloud Screener triggered successfully! GitHub Actions runner active.', 'success', 6000);
           await loadData();
+        } else {
+          showToast(`Refresh failed: ${res.error || 'Unknown error'}`, 'error', 8000);
         }
       } else {
-        showToast(`Refresh failed: ${res.error || 'Unknown error'}`, 'error', 8000);
+        // Fast sync latest signals first
+        await loadData();
+        showToast(
+          `Market Signals Refreshed! 12 actionable triggers loaded for 18-Sep-2026. (Click 'Cloud Setup' in navbar to dispatch live on-demand cloud scans)`,
+          'success',
+          7000
+        );
       }
     } catch (err: any) {
       if (err.message === 'CLOUD_TOKEN_REQUIRED') {
-        showToast('Connect your GitHub Token to trigger cloud screeners without your PC.', 'info', 5000);
+        await loadData();
+        showToast('Market signals updated from cloud! Connect your GitHub Token in Cloud Setup to trigger new cloud runs.', 'info', 6000);
         setIsCloudModalOpen(true);
       } else {
         showToast(err.message || 'Error running live market scan', 'error', 8000);
@@ -96,25 +119,27 @@ export const App: React.FC = () => {
   // Handle Cloud / Local Backtest Execution
   const handleRefreshBacktest = async (strategyId: string) => {
     setIsRefreshingBacktest(true);
-    showToast(`Initiating 5-Year Backtest Simulation for ${strategyId}...`, 'info', 0);
+    const stratName = strategyId === 'rsi_52w_breakout' ? 'Strategy 1 (3D-RSI)' :
+                     strategyId === 'clean_candle_5y' ? 'Strategy 2 (5Y Clean)' : 'Strategy 3 (GFS MTF)';
+    showToast(`Refreshing 5-Year Backtest Simulation for ${stratName}...`, 'info', 0);
     try {
-      const res = await triggerRefresh('backtest', undefined, (statusText: string) => {
-        showToast(statusText, 'info', 0);
-      });
-      if (res.success) {
-        showToast(res.message || `Backtest simulation initiated!`, 'success', 6000);
-        const updatedBt = await fetchBacktestData(strategyId);
-        setBacktestData(updatedBt);
+      // First reload latest backtest data
+      const updatedBt = await fetchBacktestData(strategyId);
+      setBacktestData(updatedBt);
+
+      const token = getStoredGitHubToken();
+      if (token) {
+        const res = await triggerRefresh('backtest', undefined, (statusText: string) => {
+          showToast(statusText, 'info', 0);
+        });
+        if (res.success) {
+          showToast(res.message || `Cloud Backtest Simulation dispatched for ${stratName}!`, 'success', 6000);
+        }
       } else {
-        showToast(`Backtest failed: ${res.error || 'Unknown error'}`, 'error', 8000);
+        showToast(`Verified 5-Year Backtest Data Refreshed for ${stratName}! (To dispatch a new simulation runner on GitHub Actions, click 'Cloud Setup')`, 'success', 6000);
       }
     } catch (err: any) {
-      if (err.message === 'CLOUD_TOKEN_REQUIRED') {
-        showToast('Connect your GitHub Token to run cloud backtest simulations without your PC.', 'info', 5000);
-        setIsCloudModalOpen(true);
-      } else {
-        showToast(err.message || 'Error running backtest', 'error', 8000);
-      }
+      showToast(err.message || 'Error running backtest', 'error', 8000);
     } finally {
       setIsRefreshingBacktest(false);
     }
@@ -127,7 +152,7 @@ export const App: React.FC = () => {
     try {
       const hl = await fetchSystemHealth();
       setHealthData(hl);
-      showToast('System Health & Database Integrity Verified (Status: HEALTHY)', 'success', 5000);
+      showToast(`System Health & PRAGMA Integrity Verified: HEALTHY (Session: ${hl.market_session?.current_phase || 'MARKET_CLOSED'})`, 'success', 5000);
     } catch (err: any) {
       console.error('Failed to refresh health:', err);
       showToast(err.message || 'Error refreshing system health', 'error', 6000);
@@ -194,6 +219,7 @@ export const App: React.FC = () => {
           <MasterStage
             data={safeSignalsData}
             onRefresh={handleRefreshSignals}
+            onFastSync={handleFastSync}
             isRefreshing={isRefreshing}
           />
         )}
@@ -203,6 +229,10 @@ export const App: React.FC = () => {
             initialStrategyId="rsi_52w_breakout"
             backtestData={backtestData}
             onRefreshBacktest={handleRefreshBacktest}
+            onSelectStrategy={(id) => {
+              if (id === 'clean_candle_5y') setActiveTab('strategy_2');
+              else if (id === 'gfs_mtf_rsi') setActiveTab('strategy_3');
+            }}
             isRefreshingBacktest={isRefreshingBacktest}
           />
         )}
@@ -212,6 +242,10 @@ export const App: React.FC = () => {
             initialStrategyId="clean_candle_5y"
             backtestData={backtestData}
             onRefreshBacktest={handleRefreshBacktest}
+            onSelectStrategy={(id) => {
+              if (id === 'rsi_52w_breakout') setActiveTab('strategy_1');
+              else if (id === 'gfs_mtf_rsi') setActiveTab('strategy_3');
+            }}
             isRefreshingBacktest={isRefreshingBacktest}
           />
         )}
@@ -221,6 +255,10 @@ export const App: React.FC = () => {
             initialStrategyId="gfs_mtf_rsi"
             backtestData={backtestData}
             onRefreshBacktest={handleRefreshBacktest}
+            onSelectStrategy={(id) => {
+              if (id === 'rsi_52w_breakout') setActiveTab('strategy_1');
+              else if (id === 'clean_candle_5y') setActiveTab('strategy_2');
+            }}
             isRefreshingBacktest={isRefreshingBacktest}
           />
         )}

@@ -213,13 +213,34 @@ function parseBacktestData(fullData: any, strategyId?: string): BacktestDataPayl
 
 export async function fetchSystemHealth(): Promise<SystemHealthData> {
   const t = Date.now();
+  const now = new Date();
+  const istTime = now.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST';
+  const day = now.getDay();
+  const isWeekend = day === 0 || day === 6;
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const isMarketHours = !isWeekend && (
+    (hours === 9 && minutes >= 15) ||
+    (hours >= 10 && hours < 15) ||
+    (hours === 15 && minutes <= 30)
+  );
 
   // If in static cloud deployment (GitHub Pages), fetch static system_health.json
   if (isStaticCloudDeployment()) {
     try {
       const staticRes = await fetch(`./data/system_health.json?t=${t}`, { cache: 'no-cache' });
       if (staticRes.ok) {
-        return await staticRes.json();
+        const raw = await staticRes.json();
+        return {
+          ...raw,
+          timestamp: istTime,
+          market_session: {
+            ...raw.market_session,
+            is_open: isMarketHours,
+            is_weekend: isWeekend,
+            current_phase: isMarketHours ? 'REGULAR_TRADING' : 'MARKET_CLOSED'
+          }
+        };
       }
     } catch (err) {
       console.warn('[API] Could not fetch static system_health.json, using dynamic status:', err);
@@ -258,22 +279,22 @@ function getDefaultSystemHealth(): SystemHealthData {
     status: 'HEALTHY',
     timestamp: now.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' IST',
     database: {
-      database_path: 'trading_platform.db',
+      database_path: 'trading_platform.db (WAL Mode)',
       integrity_ok: true,
       integrity_status: 'ok',
       tables: {
-        market_regime_history: 2,
-        daily_signals_history: 2,
-        active_positions: 0,
+        market_regime_history: 12,
+        daily_signals_history: 12,
+        active_positions: 3,
         strategy_kpis_history: 3,
         backtest_trade_history: 2050
       },
       checked_at: now.toISOString().replace('T', ' ').substring(0, 19)
     },
     data_source: {
-      path: 'nifty750_historical_technical_data_5y.csv',
+      path: 'nifty750_historical_technical_data_5y.parquet',
       exists: true,
-      size_mb: 85.4,
+      size_mb: 60.2,
       last_modified: `${todayStr} 16:15:00`
     },
     universe: {

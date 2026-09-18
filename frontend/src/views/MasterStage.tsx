@@ -15,10 +15,11 @@ import {
 interface MasterStageProps {
   data: ConsolidatedSignalsPayload;
   onRefresh: () => void;
+  onFastSync?: () => void;
   isRefreshing: boolean;
 }
 
-export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRefreshing }) => {
+export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, onFastSync, isRefreshing }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [strategyFilter, setStrategyFilter] = useState<string>('all');
 
@@ -319,9 +320,9 @@ export const MasterStage: React.FC<MasterStageProps> = ({ data, onRefresh, isRef
             </div>
 
             <button
-              onClick={onRefresh}
+              onClick={onFastSync || onRefresh}
               disabled={isRefreshing}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-cyan-500/15 text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs font-bold transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-cyan-500/15 text-cyan-400 border border-slate-800 hover:border-cyan-500/40 text-xs font-bold transition-all disabled:opacity-50 active:scale-95"
               title="Sync latest signals"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
