@@ -1,7 +1,7 @@
 import React from 'react';
-import { LayoutDashboard, TrendingUp, Zap, Clock, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, ShieldCheck } from 'lucide-react';
 
-export type ActiveTab = 'nexus' | 'strategy_1' | 'strategy_2' | 'strategy_3' | 'health';
+export type ActiveTab = 'live_tracker' | 'backtesting' | 'system_health';
 
 interface MobileDockProps {
   activeTab: ActiveTab;
@@ -16,36 +16,26 @@ export const MobileDock: React.FC<MobileDockProps> = ({
 }) => {
   const items: Array<{ id: ActiveTab; label: string; icon: React.ReactNode; badge?: number }> = [
     {
-      id: 'nexus',
-      label: 'Nexus',
+      id: 'live_tracker',
+      label: 'Live Tracker',
       icon: <LayoutDashboard className="w-5 h-5" />,
       badge: triggerCount > 0 ? triggerCount : undefined
     },
     {
-      id: 'strategy_1',
-      label: '3D-RSI',
+      id: 'backtesting',
+      label: 'Backtesting',
       icon: <TrendingUp className="w-5 h-5" />
     },
     {
-      id: 'strategy_2',
-      label: '5Y-High',
-      icon: <Zap className="w-5 h-5" />
-    },
-    {
-      id: 'strategy_3',
-      label: 'GFS MTF',
-      icon: <Clock className="w-5 h-5" />
-    },
-    {
-      id: 'health',
-      label: 'Health',
+      id: 'system_health',
+      label: 'System & Cloud',
       icon: <ShieldCheck className="w-5 h-5" />
     }
   ];
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-t border-cyan-500/20 shadow-2xl safe-bottom">
-      <div className="grid grid-cols-5 h-16 max-w-lg mx-auto">
+      <div className="grid grid-cols-3 h-16 max-w-md mx-auto">
         {items.map((item) => {
           const isActive = activeTab === item.id;
           return (

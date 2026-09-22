@@ -174,3 +174,35 @@ export interface SystemHealthData {
     snapshots_list: any[];
   };
 }
+
+export type ActiveTab = 'live_tracker' | 'backtesting' | 'system_health';
+
+export interface ComparisonMetric {
+  metric_name: string;
+  category: 'returns' | 'risk' | 'consistency';
+  backtest_value: string;
+  live_value: string;
+  variance_pct?: number;
+  variance_label: string;
+  status: 'OUTPERFORMING' | 'ALIGNED' | 'NORMAL_RANGE' | 'LAGGING';
+  interpretation: string;
+}
+
+export interface LiveSignalTrackerItem {
+  id: string;
+  symbol: string;
+  company_name: string;
+  strategy_id: string;
+  strategy_name: string;
+  signal_date: string;
+  entry_trigger: number;
+  current_price: number;
+  initial_sl: number;
+  trailing_sl: number;
+  distance_to_sl_pct: number;
+  mtm_pnl_pct: number;
+  holding_days: number;
+  status: 'PENDING_TRIGGER' | 'ACTIVE_HOLDING' | 'TRAILING_ACTIVE' | 'TARGET_REACHED' | 'STOPPED_OUT';
+  groww_chart_url: string;
+}
+

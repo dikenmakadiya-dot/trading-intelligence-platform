@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navbar } from './Navbar';
 import { MobileDock, ActiveTab } from './MobileDock';
-import { LayoutDashboard, TrendingUp, Zap, Clock, ShieldCheck, Radio } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, ShieldCheck, Radio } from 'lucide-react';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -26,36 +26,27 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   gateOpen = true,
   onOpenCloudModal
 }) => {
-  const navLinks: Array<{ id: ActiveTab; label: string; sub: string; icon: React.ReactNode; badge?: number }> = [
+  const navLinks: Array<{ id: ActiveTab; label: string; sub: string; badgeText?: string; icon: React.ReactNode; badge?: number }> = [
     {
-      id: 'nexus',
-      label: 'Signal Nexus',
-      sub: 'Master Stage & Active Slots',
+      id: 'live_tracker',
+      label: 'Live Tracker',
+      sub: 'Signals, Slots & Drift Monitor',
+      badgeText: 'LIVE',
       icon: <LayoutDashboard className="w-5 h-5" />,
       badge: triggerCount > 0 ? triggerCount : undefined
     },
     {
-      id: 'strategy_1',
-      label: '3-Day RSI Breakout',
-      sub: 'Swing RSI + 52W High',
+      id: 'backtesting',
+      label: 'Backtesting Hub',
+      sub: '3 Audited Strategies (5Y Sim)',
+      badgeText: '3 AUDITED',
       icon: <TrendingUp className="w-5 h-5" />
     },
     {
-      id: 'strategy_2',
-      label: '5Y Clean Candle',
-      sub: 'Clean Momentum Breakout',
-      icon: <Zap className="w-5 h-5" />
-    },
-    {
-      id: 'strategy_3',
-      label: 'GFS Multi-Timeframe',
-      sub: 'Daily / Weekly / Monthly RSI',
-      icon: <Clock className="w-5 h-5" />
-    },
-    {
-      id: 'health',
-      label: 'Cloud Health & Backups',
-      sub: 'Integrity, Snapshots & Data',
+      id: 'system_health',
+      label: 'System & Cloud',
+      sub: 'Integrity, Engine & Backups',
+      badgeText: 'WAL OK',
       icon: <ShieldCheck className="w-5 h-5" />
     }
   ];
@@ -74,126 +65,66 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         onOpenCloudModal={onOpenCloudModal}
       />
 
-      {/* Main Body */}
-      <div className="flex-1 flex max-w-7xl w-full mx-auto pb-24 md:pb-8 relative z-10">
-        {/* Desktop Left Sidebar (hidden on mobile) */}
-        <aside className="hidden md:flex flex-col w-64 p-4 border-r border-slate-800/80 shrink-0 gap-5">
-          {/* Navigation Section */}
-          <div className="space-y-4">
-            
-            {/* Group 1: Live Scanner */}
-            <div className="space-y-1">
-              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 px-3 mb-1.5 flex items-center justify-between">
-                <span>Live Scanner</span>
-                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">LIVE</span>
-              </div>
-              {navLinks.filter(i => i.id === 'nexus').map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition-all group ${
-                      isActive
-                        ? 'bg-gradient-to-r from-cyan-500/15 via-cyan-500/10 to-transparent text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-950/40'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-900/60 border border-transparent'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`transition-transform group-hover:scale-110 ${isActive ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]' : 'text-slate-400'}`}>
-                        {item.icon}
-                      </span>
-                      <div>
-                        <div className="text-xs font-bold leading-tight font-sans">
-                          {item.label}
-                        </div>
-                        <div className="text-[10px] text-slate-500 leading-tight font-mono mt-0.5">
-                          {item.sub}
-                        </div>
+      {/* Main Body - Edge to edge widescreen layout */}
+      <div className="flex-1 flex w-full px-2 sm:px-4 lg:px-6 pb-24 md:pb-8 relative z-10 gap-3">
+        {/* Desktop Left Sidebar (3 Master Tabs) */}
+        <aside className="hidden md:flex flex-col w-64 p-3 border-r border-slate-800/80 shrink-0 gap-4">
+          <div className="space-y-2">
+            <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 px-3 mb-2 flex items-center justify-between">
+              <span>Navigation Control</span>
+              <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">3 HUBS</span>
+            </div>
+
+            {navLinks.map((item) => {
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-left transition-all duration-200 group relative ${
+                    isActive
+                      ? 'bg-gradient-to-r from-cyan-500/15 via-cyan-500/10 to-transparent text-cyan-300 border border-cyan-500/40 shadow-lg shadow-cyan-950/50'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-900/60 border border-slate-800/40 hover:border-slate-700/60'
+                  }`}
+                >
+                  {isActive && (
+                    <span className="absolute left-0 top-2 bottom-2 w-1 bg-gradient-to-b from-cyan-400 to-emerald-400 rounded-r-full shadow-[0_0_12px_rgba(0,229,255,0.8)]"></span>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <span className={`p-2 rounded-xl transition-transform group-hover:scale-105 ${
+                      isActive 
+                        ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]' 
+                        : 'bg-slate-900/80 text-slate-400 border border-slate-800'
+                    }`}>
+                      {item.icon}
+                    </span>
+                    <div>
+                      <div className="text-xs font-bold leading-tight font-sans tracking-tight">
+                        {item.label}
+                      </div>
+                      <div className="text-[10px] text-slate-500 leading-tight font-mono mt-0.5">
+                        {item.sub}
                       </div>
                     </div>
-                    {item.badge !== undefined && (
-                      <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm">
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {item.badge !== undefined ? (
+                      <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm animate-pulse">
                         {item.badge}
                       </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Group 2: 5Y Audited Backtest */}
-            <div className="space-y-1">
-              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400/80 px-3 mb-1.5 flex items-center justify-between">
-                <span>5Y Backtesting</span>
-                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">3 AUDITED</span>
-              </div>
-              {navLinks.filter(i => i.id.startsWith('strategy_')).map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition-all group ${
-                      isActive
-                        ? 'bg-gradient-to-r from-cyan-500/15 via-cyan-500/10 to-transparent text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-950/40'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-900/60 border border-transparent'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`transition-transform group-hover:scale-110 ${isActive ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]' : 'text-slate-400'}`}>
-                        {item.icon}
+                    ) : item.badgeText ? (
+                      <span className={`font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border ${
+                        isActive
+                          ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+                          : 'bg-slate-900 text-slate-500 border-slate-800'
+                      }`}>
+                        {item.badgeText}
                       </span>
-                      <div>
-                        <div className="text-xs font-bold leading-tight font-sans">
-                          {item.label}
-                        </div>
-                        <div className="text-[10px] text-slate-500 leading-tight font-mono mt-0.5">
-                          {item.sub}
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Group 3: System Health */}
-            <div className="space-y-1">
-              <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 px-3 mb-1.5 flex items-center justify-between">
-                <span>System & Cloud</span>
-                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">ACID</span>
-              </div>
-              {navLinks.filter(i => i.id === 'health').map((item) => {
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-left transition-all group ${
-                      isActive
-                        ? 'bg-gradient-to-r from-cyan-500/15 via-cyan-500/10 to-transparent text-cyan-300 border border-cyan-500/30 shadow-lg shadow-cyan-950/40'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-900/60 border border-transparent'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`transition-transform group-hover:scale-110 ${isActive ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]' : 'text-slate-400'}`}>
-                        {item.icon}
-                      </span>
-                      <div>
-                        <div className="text-xs font-bold leading-tight font-sans">
-                          {item.label}
-                        </div>
-                        <div className="text-[10px] text-slate-500 leading-tight font-mono mt-0.5">
-                          {item.sub}
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
+                    ) : null}
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
           {/* Institutional Status Deck */}
