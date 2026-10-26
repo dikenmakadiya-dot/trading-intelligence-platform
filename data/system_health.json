@@ -1,6 +1,6 @@
 {
   "status": "HEALTHY",
-  "timestamp": "2026-10-23 15:29:15 IST",
+  "timestamp": "2026-10-26 17:02:48 IST",
   "database": {
     "database_path": "/home/runner/work/trading-intelligence-platform/trading-intelligence-platform/data/trading_platform.db",
     "integrity_ok": true,
@@ -12,13 +12,13 @@
       "strategy_kpis_history": 2,
       "backtest_trade_history": 486
     },
-    "checked_at": "2026-10-23 15:29:15"
+    "checked_at": "2026-10-26 17:02:48"
   },
   "data_source": {
     "path": "nifty750_historical_technical_data_5y.parquet",
     "exists": true,
     "size_mb": 60.24,
-    "last_modified": "2026-10-23 15:27:15"
+    "last_modified": "2026-10-26 16:59:13"
   },
   "universe": {
     "total_constituents": 750,
@@ -27,10 +27,10 @@
     "status": "TRACKING_ACTIVE"
   },
   "market_session": {
-    "is_open": true,
+    "is_open": false,
     "is_holiday": false,
     "is_weekend": false,
-    "current_phase": "REGULAR_TRADING",
+    "current_phase": "MARKET_CLOSED",
     "exchange": "NSE (National Stock Exchange of India)"
   },
   "nse_holidays_2026": [
@@ -116,42 +116,42 @@
     }
   ],
   "backups": {
-    "total_snapshots": 21,
+    "total_snapshots": 20,
     "latest_snapshot": {
-      "snapshot_id": "snapshot_2026-10-23_152915_daily_screener",
-      "created_at_utc": "2026-10-23T15:29:15.677109+00:00",
-      "created_at_ist": "2026-10-23 15:29:15 IST",
+      "snapshot_id": "snapshot_2026-10-26_170248_daily_screener",
+      "created_at_utc": "2026-10-26T17:02:48.896448+00:00",
+      "created_at_ist": "2026-10-26 17:02:48 IST",
       "database_path": "/home/runner/work/trading-intelligence-platform/trading-intelligence-platform/data/trading_platform.db",
       "database_integrity_ok": true,
       "db_backup_size_bytes": 237568,
-      "db_backup_sha256": "e18a943bfd67aaf37eea155b75c5c910a38b0ab21884c909e42faf8ec136211c",
+      "db_backup_sha256": "5ff67f86ad546ac80ac389e91274338d970e56675a09b3c789eba058bf1d443f",
       "tables": {
         "market_regime_history": {
           "row_count": 1,
           "parquet_file": "market_regime_history.parquet",
           "parquet_size_bytes": 4893,
-          "parquet_sha256": "4622fb23c29875b19123a4efb3ffef34c233d9f1415a889e1430d966c0363147",
+          "parquet_sha256": "87c4adab95d29d6cabec59c9edc443297cb80c69c20ada8e8f5a8bdb9bf69e1a",
           "json_gz_file": "market_regime_history.json.gz",
           "json_gz_size_bytes": 224,
-          "json_gz_sha256": "4dfbb99962a994cdb53a2205f5b299c035888cae219a0381a68554ebee2fc135"
+          "json_gz_sha256": "52f317ccb8883947287ca7cf2336822abe2ed7f0ec2765e8203d39346296938d"
         },
         "daily_signals_history": {
           "row_count": 1,
           "parquet_file": "daily_signals_history.parquet",
           "parquet_size_bytes": 10865,
-          "parquet_sha256": "276df902986374ce90c088426bc43e7a0b72995d0a3de4ca38b3ec7bab380611",
+          "parquet_sha256": "a1b9f86ebbc37e1ac67d9a242d340cc2d65e3f6d575f8c95c2ca6909bac8aad5",
           "json_gz_file": "daily_signals_history.json.gz",
           "json_gz_size_bytes": 507,
-          "json_gz_sha256": "f2af2abe617ef3712a0e9d5b844a3c6d6e95930cd87f5e3a36750cc64d224e74"
+          "json_gz_sha256": "2968f236b45545834ee001d6fa3f2448ac902da5586dcdbe7e71432144ebca19"
         },
         "active_positions": {
           "row_count": 4,
           "parquet_file": "active_positions.parquet",
           "parquet_size_bytes": 13577,
-          "parquet_sha256": "b4f5f5173df3f29e181fe8b619e95c1c56c98b6a36883dcbf353d23eb3dd9d34",
+          "parquet_sha256": "95110d5c5c746926f89eb8e48501812ec691840cc7fdba862ca1922085b690ee",
           "json_gz_file": "active_positions.json.gz",
-          "json_gz_size_bytes": 715,
-          "json_gz_sha256": "0e6936894303e905e9374dc43f128b9b1e46db2cd181d64677639e3657eae360"
+          "json_gz_size_bytes": 714,
+          "json_gz_sha256": "9f690793efd5a208aee040a53ee065cc61765fd93bfd6a9fd34add7344385aaf"
         },
         "strategy_kpis_history": {
           "row_count": 2,
@@ -160,7 +160,7 @@
           "parquet_sha256": "f1349669a5bacf565078f44e8a2840597e705bd5699dc0cf32d6db61c874f464",
           "json_gz_file": "strategy_kpis_history.json.gz",
           "json_gz_size_bytes": 2008,
-          "json_gz_sha256": "67c56ddb1ecc5f47049e8953a361638cb647597213b6055a0ad5adf7ca287bc7"
+          "json_gz_sha256": "a3829de6bdf6518bf5cbfb92f4ce961bd4aaa184503804aec10b5985ee61b43c"
         },
         "backtest_trade_history": {
           "row_count": 486,
@@ -169,13 +169,71 @@
           "parquet_sha256": "660d46607ddd2645b48be4473df9b9f5622e9f1584cbb62fba62a9e298184a86",
           "json_gz_file": "backtest_trade_history.json.gz",
           "json_gz_size_bytes": 29588,
-          "json_gz_sha256": "5a0f25d9e8b55787aa721fc241de22c9bd89dc85e0714c4d1277f7268bd6bdb8"
+          "json_gz_sha256": "6fedda77a3f639700e2a181854bf0dc1fd8d3100d6a39c429ed0df67191c6ffe"
         }
       },
       "total_tables": 5,
       "tag": "daily_screener"
     },
     "snapshots_list": [
+      {
+        "snapshot_id": "snapshot_2026-10-26_170248_daily_screener",
+        "created_at_utc": "2026-10-26T17:02:48.896448+00:00",
+        "created_at_ist": "2026-10-26 17:02:48 IST",
+        "database_path": "/home/runner/work/trading-intelligence-platform/trading-intelligence-platform/data/trading_platform.db",
+        "database_integrity_ok": true,
+        "db_backup_size_bytes": 237568,
+        "db_backup_sha256": "5ff67f86ad546ac80ac389e91274338d970e56675a09b3c789eba058bf1d443f",
+        "tables": {
+          "market_regime_history": {
+            "row_count": 1,
+            "parquet_file": "market_regime_history.parquet",
+            "parquet_size_bytes": 4893,
+            "parquet_sha256": "87c4adab95d29d6cabec59c9edc443297cb80c69c20ada8e8f5a8bdb9bf69e1a",
+            "json_gz_file": "market_regime_history.json.gz",
+            "json_gz_size_bytes": 224,
+            "json_gz_sha256": "52f317ccb8883947287ca7cf2336822abe2ed7f0ec2765e8203d39346296938d"
+          },
+          "daily_signals_history": {
+            "row_count": 1,
+            "parquet_file": "daily_signals_history.parquet",
+            "parquet_size_bytes": 10865,
+            "parquet_sha256": "a1b9f86ebbc37e1ac67d9a242d340cc2d65e3f6d575f8c95c2ca6909bac8aad5",
+            "json_gz_file": "daily_signals_history.json.gz",
+            "json_gz_size_bytes": 507,
+            "json_gz_sha256": "2968f236b45545834ee001d6fa3f2448ac902da5586dcdbe7e71432144ebca19"
+          },
+          "active_positions": {
+            "row_count": 4,
+            "parquet_file": "active_positions.parquet",
+            "parquet_size_bytes": 13577,
+            "parquet_sha256": "95110d5c5c746926f89eb8e48501812ec691840cc7fdba862ca1922085b690ee",
+            "json_gz_file": "active_positions.json.gz",
+            "json_gz_size_bytes": 714,
+            "json_gz_sha256": "9f690793efd5a208aee040a53ee065cc61765fd93bfd6a9fd34add7344385aaf"
+          },
+          "strategy_kpis_history": {
+            "row_count": 2,
+            "parquet_file": "strategy_kpis_history.parquet",
+            "parquet_size_bytes": 16212,
+            "parquet_sha256": "f1349669a5bacf565078f44e8a2840597e705bd5699dc0cf32d6db61c874f464",
+            "json_gz_file": "strategy_kpis_history.json.gz",
+            "json_gz_size_bytes": 2008,
+            "json_gz_sha256": "a3829de6bdf6518bf5cbfb92f4ce961bd4aaa184503804aec10b5985ee61b43c"
+          },
+          "backtest_trade_history": {
+            "row_count": 486,
+            "parquet_file": "backtest_trade_history.parquet",
+            "parquet_size_bytes": 46171,
+            "parquet_sha256": "660d46607ddd2645b48be4473df9b9f5622e9f1584cbb62fba62a9e298184a86",
+            "json_gz_file": "backtest_trade_history.json.gz",
+            "json_gz_size_bytes": 29588,
+            "json_gz_sha256": "6fedda77a3f639700e2a181854bf0dc1fd8d3100d6a39c429ed0df67191c6ffe"
+          }
+        },
+        "total_tables": 5,
+        "tag": "daily_screener"
+      },
       {
         "snapshot_id": "snapshot_2026-10-23_152915_daily_screener",
         "created_at_utc": "2026-10-23T15:29:15.677109+00:00",
@@ -983,64 +1041,6 @@
             "json_gz_file": "backtest_trade_history.json.gz",
             "json_gz_size_bytes": 29588,
             "json_gz_sha256": "b32060feb8541a8ea29cffcb79f6c74a20bd6c2c2b7f19827f4074015d756114"
-          }
-        },
-        "total_tables": 5,
-        "tag": "daily_screener"
-      },
-      {
-        "snapshot_id": "snapshot_2026-10-02_162227_daily_screener",
-        "created_at_utc": "2026-10-02T16:22:27.412410+00:00",
-        "created_at_ist": "2026-10-02 16:22:27 IST",
-        "database_path": "/home/runner/work/trading-intelligence-platform/trading-intelligence-platform/data/trading_platform.db",
-        "database_integrity_ok": true,
-        "db_backup_size_bytes": 237568,
-        "db_backup_sha256": "7cd683679a823cfee5d20f22a71d1a2f98241dfd483a53f7fca2419aa583d483",
-        "tables": {
-          "market_regime_history": {
-            "row_count": 1,
-            "parquet_file": "market_regime_history.parquet",
-            "parquet_size_bytes": 4893,
-            "parquet_sha256": "a6f4cdb9e3d3b8f7c6db281bc1e849812ff18ae70077b97af8d625858d53fbd8",
-            "json_gz_file": "market_regime_history.json.gz",
-            "json_gz_size_bytes": 223,
-            "json_gz_sha256": "dcb942ea110b647a25ccb87aa72b597f3d0b635bea904368214ca53c6217c2ac"
-          },
-          "daily_signals_history": {
-            "row_count": 1,
-            "parquet_file": "daily_signals_history.parquet",
-            "parquet_size_bytes": 10865,
-            "parquet_sha256": "ea638e080f12c8e55708b4fd7b1e37e08da58fa726d5ae219c6ca3647cac0a0e",
-            "json_gz_file": "daily_signals_history.json.gz",
-            "json_gz_size_bytes": 507,
-            "json_gz_sha256": "3e13965e76ec9d999591fde66bcc8ed85367cd33b94d6715989fb919b22a81de"
-          },
-          "active_positions": {
-            "row_count": 4,
-            "parquet_file": "active_positions.parquet",
-            "parquet_size_bytes": 13577,
-            "parquet_sha256": "cb97537b9f369b905e74144b47c68d6c2d606be9297cbea7a63d0c7b6442902e",
-            "json_gz_file": "active_positions.json.gz",
-            "json_gz_size_bytes": 714,
-            "json_gz_sha256": "81ded01419492a9a2cc7a4ee9981417ca307f596a853c80a0231cc589a043a37"
-          },
-          "strategy_kpis_history": {
-            "row_count": 2,
-            "parquet_file": "strategy_kpis_history.parquet",
-            "parquet_size_bytes": 16212,
-            "parquet_sha256": "710efa130f75518f4e9aebb0d327930859b80f12b8580dcda675d7993babbd6c",
-            "json_gz_file": "strategy_kpis_history.json.gz",
-            "json_gz_size_bytes": 2008,
-            "json_gz_sha256": "983b68fdd7c11164c8544b1739b0e46941d414c9566dc67bf882dadabcc0f882"
-          },
-          "backtest_trade_history": {
-            "row_count": 486,
-            "parquet_file": "backtest_trade_history.parquet",
-            "parquet_size_bytes": 46171,
-            "parquet_sha256": "78e598633c5e89f6f6175551fcabb91b943a3110f4d1b932decf9b64ef8a2a40",
-            "json_gz_file": "backtest_trade_history.json.gz",
-            "json_gz_size_bytes": 29588,
-            "json_gz_sha256": "60f099c6a4194a557afc3df2b1ec54b05fe7f36b21be9f912d8dc192d3e4d7a7"
           }
         },
         "total_tables": 5,
