@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-06 17:42:56 IST",
+  "generated_at": "2026-11-09 21:04:25 IST",
   "as_of_date": "18-Sep-2026",
   "market_regime": {
     "breadth_pct": 36.8,
@@ -62,7 +62,7 @@
         "exit_reason": null,
         "realized_pnl": null,
         "realized_pnl_pct": null,
-        "updated_at": "2026-11-06 17:42:56"
+        "updated_at": "2026-11-09 21:04:25"
       },
       {
         "id": 3,
@@ -86,7 +86,7 @@
         "exit_reason": null,
         "realized_pnl": null,
         "realized_pnl_pct": null,
-        "updated_at": "2026-11-06 17:42:56"
+        "updated_at": "2026-11-09 21:04:25"
       },
       {
         "id": 2,
@@ -110,7 +110,7 @@
         "exit_reason": null,
         "realized_pnl": null,
         "realized_pnl_pct": null,
-        "updated_at": "2026-11-06 17:42:56"
+        "updated_at": "2026-11-09 21:04:25"
       },
       {
         "id": 1,
@@ -134,7 +134,7 @@
         "exit_reason": null,
         "realized_pnl": null,
         "realized_pnl_pct": null,
-        "updated_at": "2026-11-06 17:42:56"
+        "updated_at": "2026-11-09 21:04:25"
       }
     ]
   },
@@ -161,7 +161,7 @@
       "exit_reason": null,
       "realized_pnl": null,
       "realized_pnl_pct": null,
-      "updated_at": "2026-11-06 17:42:56"
+      "updated_at": "2026-11-09 21:04:25"
     },
     {
       "id": 3,
@@ -185,7 +185,7 @@
       "exit_reason": null,
       "realized_pnl": null,
       "realized_pnl_pct": null,
-      "updated_at": "2026-11-06 17:42:56"
+      "updated_at": "2026-11-09 21:04:25"
     },
     {
       "id": 2,
@@ -209,7 +209,7 @@
       "exit_reason": null,
       "realized_pnl": null,
       "realized_pnl_pct": null,
-      "updated_at": "2026-11-06 17:42:56"
+      "updated_at": "2026-11-09 21:04:25"
     },
     {
       "id": 1,
@@ -233,12 +233,12 @@
       "exit_reason": null,
       "realized_pnl": null,
       "realized_pnl_pct": null,
-      "updated_at": "2026-11-06 17:42:56"
+      "updated_at": "2026-11-09 21:04:25"
     }
   ],
   "backup_status": {
-    "last_snapshot_id": "snapshot_2026-11-06_174256_daily_screener",
-    "created_at": "2026-11-06 17:42:56 IST",
+    "last_snapshot_id": "snapshot_2026-11-09_210425_daily_screener",
+    "created_at": "2026-11-09 21:04:25 IST",
     "integrity_ok": true
   },
   "strategies": {
